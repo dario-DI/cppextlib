@@ -1,0 +1,15 @@
+#ifndef TDE_CONFIG
+#define TDE_CONFIG 1
+
+#ifndef DELL_EXPORT
+#define TDE_IMPORT __declspec(dllimport)
+#else
+#define TDE_IMPORT __declspec(dllexport)
+#endif
+
+#define USE_MFC
+
+#pragma warning ( disable : 4099 )
+#pragma warning ( disable : 4150 )
+
+#endif
