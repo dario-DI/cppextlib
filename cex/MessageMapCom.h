@@ -6,13 +6,10 @@
 /// \author: DI
 /// \time: 2012/3/15 14:22
 
-#if 0
-
-//!	通用消息映射使用方法
-//! 与windows消息映射相似
-/*! \ingroup core
- */
-namespace exampleCode_send_message
+#pragma region example_usage
+/* example usage
+ 
+namespace example_usage
 {
 	void TestClass::Test()
 	{
@@ -80,10 +77,11 @@ namespace exampleCode_recieve_message
 	}
 }
 
-#endif // define! 0
+*/
+#pragma endregion
 
-#ifndef _TDE_MESSAGE_MAP_H_
-#define _TDE_MESSAGE_MAP_H_ 1
+#ifndef _CEX_MESSAGE_MAP_H_
+#define _CEX_MESSAGE_MAP_H_ 1
 
 #pragma once
 #include <cex/config>
@@ -185,14 +183,14 @@ enum ComMsgType
  */
 struct strComMsg
 {
-	UINT type;			///	消息类型	
+	unsigned int type;			///	消息类型	
 	std::string info;	///	消息字符串描述
 	void* param;		///	消息参数
 
 	strComMsg() : type(0), param(0) {}
-	strComMsg(UINT t) : type(t), param(0) {}
-	strComMsg(UINT t, const std::string& s) : type(t), info(s), param(0) {}
-	strComMsg(UINT t, const std::string& s, void* p) : type(t), info(s), param(p) {}
+	strComMsg(unsigned int t) : type(t), param(0) {}
+	strComMsg(unsigned int t, const std::string& s) : type(t), info(s), param(0) {}
+	strComMsg(unsigned int t, const std::string& s, void* p) : type(t), info(s), param(p) {}
 
 	strComMsg( const std::string& s ) : type(0), info(s), param(0) {}
 
@@ -201,9 +199,9 @@ struct strComMsg
 typedef strComMsg ComMsg;
 
 /// 向没有返回值的响应函数发送消息
-template<typename T> void SendMessageCom( T* ptr, UINT type ) { return ::SendMessageCom( ptr, ComMsg(type) ); }
-template<typename T> void SendMessageCom( T* ptr, UINT type, const std::string& info ) { return ::SendMessageCom( ptr, ComMsg(type, info) ); }
-template<typename T> void SendMessageCom( T* ptr, UINT type, const std::string& info, void* param ) { return ::SendMessageCom( ptr, ComMsg(type, info, param) ); }
+template<typename T> void SendMessageCom( T* ptr, unsigned int type ) { return ::SendMessageCom( ptr, ComMsg(type) ); }
+template<typename T> void SendMessageCom( T* ptr, unsigned int type, const std::string& info ) { return ::SendMessageCom( ptr, ComMsg(type, info) ); }
+template<typename T> void SendMessageCom( T* ptr, unsigned int type, const std::string& info, void* param ) { return ::SendMessageCom( ptr, ComMsg(type, info, param) ); }
 template<typename T> void SendMessageCom( T* ptr, const ComMsg& msg ) { ::SendMessageComAny<T,ComMsg const&>(ptr, msg); }
 
 
@@ -342,7 +340,7 @@ MT_EXPRESSION_IMPL_0_7( MT_SENDMSGCOM_IMPL )
 	}
 
 /// 关闭消息映射. 用于减少程序退出时间.
-CEX_API void APIENTRY ShutMessageMapCom();
+CEX_API void __stdcall ShutMessageMapCom();
 
 template<typename ValueType>
 ValueType unthrow_any_cast(const boost::any& operand)

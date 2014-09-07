@@ -6,10 +6,11 @@
 /// \note:
 /// \author: DI
 /// \time: 2011/9/20 11:02
-#ifndef _TDE_DELTAREFLECTION_H_
-#define _TDE_DELTAREFLECTION_H_
+#ifndef _CEX_DELTAREFLECTION_H_
+#define _CEX_DELTAREFLECTION_H_
 
-#if 0
+#pragma region example_usage
+/*example usage
 
 // 注册函数
 {
@@ -50,7 +51,8 @@ REGIST_DELTA_INSTANCE(IMyInterface, MyImplement)
 // 使用单件对象
 IMyInterface instance = cex::DeltaInstance<IMyInterface>();
 
-#endif
+*/
+#pragma endregion
 
 
 #pragma once
@@ -143,9 +145,9 @@ namespace cex
 	/// delta register
 	struct UniqueTypeofDeltaRegister {};
 	typedef KeyValueRegister<size_t, boost::any, UniqueTypeofDeltaRegister> UIntDeltaRegister;
-	CEX_API UIntDeltaRegister& APIENTRY UIntDeltaRegisterSingleton();
+	CEX_API  UIntDeltaRegister& __stdcall UIntDeltaRegisterSingleton();
 	typedef KeyValueRegister<std::string, boost::any, UniqueTypeofDeltaRegister> StringDeltaRegister;
-	CEX_API StringDeltaRegister& APIENTRY StringDeltaRegisterSingleton();
+	CEX_API StringDeltaRegister& __stdcall StringDeltaRegisterSingleton();
 
 	namespace df 
 	{
@@ -169,8 +171,26 @@ namespace cex
 
 			static std::string Convert(const wchar_t* key)
 			{
-				return std::string(CStringA(key).GetBuffer());
+				std::wstring wstr(key);
+				return ws2s(wstr);
 			}
+
+			static std::string ws2s(const std::wstring& ws)
+			{
+				std::string curLocale = setlocale(LC_ALL, NULL);        // curLocale = "C";
+				setlocale(LC_ALL, "chs");
+				const wchar_t* _Source = ws.c_str();
+				size_t _Dsize = 2 * ws.size() + 1;
+				char *_Dest = new char[_Dsize];
+				memset(_Dest,0,_Dsize);
+				size_t numConverted;
+				wcstombs_s(&numConverted, _Dest,_Dsize, _Source,_Dsize);
+				std::string result = _Dest;
+				delete []_Dest;
+				setlocale(LC_ALL, curLocale.c_str());
+				return result;
+			} 
+
 		};
 
 		// unsigned int type

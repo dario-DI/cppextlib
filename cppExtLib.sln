@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cppExtLib", "cppExtLib\cppExtLib.vcxproj", "{4625A550-03D0-40F2-9964-BD3A8527228C}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UnitTest", "UnitTest\UnitTest.vcxproj", "{8A52E4B4-06FC-4A86-8992-23E253B7719A}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Test", "Test\UnitTest.vcxproj", "{8A52E4B4-06FC-4A86-8992-23E253B7719A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

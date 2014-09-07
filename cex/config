@@ -1,13 +1,16 @@
 #ifndef CEX_CONFIG
 #define CEX_CONFIG 1
 
+#if defined( USING_CEX_LIB )
+    #pragma comment(lib, USING_CEX_LIB  ".lib") 
+    #pragma message("Automatically linking with " USING_CEX_LIB ".dll")
+#endif
+
 #ifndef CPPEXTLIB_EXPORTS
 #define CEX_API __declspec(dllimport)
 #else
 #define CEX_API __declspec(dllexport)
 #endif
-
-#define USE_MFC
 
 #define _3RDPARTY_PATH_
 
