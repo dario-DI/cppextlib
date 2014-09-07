@@ -1,0 +1,25 @@
+#ifndef CEX_CONFIG
+#define CEX_CONFIG 1
+
+#ifndef CPPEXTLIB_EXPORTS
+#define CEX_API __declspec(dllimport)
+#else
+#define CEX_API __declspec(dllexport)
+#endif
+
+#define USE_MFC
+
+#define _3RDPARTY_PATH_
+
+#pragma warning ( disable : 4099 )
+#pragma warning ( disable : 4150 )
+
+
+// 导出类含有变量
+//#pragma warning( disable: 4251 )
+
+#ifdef WIN32
+#define _CRT_SECURE_NO_WARNINGS
+#endif
+
+#endif

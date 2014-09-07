@@ -6,4 +6,5 @@
 /bin/
 /debug/
 /release/
+/ipch/
 *.suo
