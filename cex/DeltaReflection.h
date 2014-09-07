@@ -325,8 +325,9 @@ namespace cex
 				assert(false); // the same named value has already registered.
 				return;
 			}
-			catch(...)
+			catch(std::exception e)
 			{
+				// normal
 			}
 #endif
 			Traits::Instance().Regist(Traits::Convert(key), value);
@@ -361,8 +362,9 @@ namespace cex
 				assert(false); // the same named value has already registered.
 				return;
 			}
-			catch(...)
+			catch(std::exception e)
 			{
+				// normal
 			}
 #endif
 			reg->Regist(ValueTraits::Convert(valueKey), value);

@@ -12,6 +12,11 @@ int _tmain(int argc, _TCHAR* argv[])
 {
 	CEX_RUN_ALL_TESTS();
 
+	//CEX_RUN_TEST("DeltaReflectTest")
+	//CEX_RUN_TEST("MessageMapTest")
+
+	system("pause");
+
 	return 0;
 }
 

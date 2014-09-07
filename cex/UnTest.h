@@ -28,6 +28,10 @@ namespace cex
 		virtual void addCase(const std::string& caseName, const TestFun& fun)=0;
 
 		virtual void run()=0;
+
+		virtual void run(const std::string& caseName)=0;
+
+		virtual void run(size_t index)=0;
 	};
 
 #define UnitTestRegisterIns (*(cex::DeltaInstance<cex::IUnitTestMethodRegister>()))
@@ -43,6 +47,9 @@ namespace cex
 
 #define CEX_RUN_ALL_TESTS() \
 	UnitTestRegisterIns.run();
+
+#define CEX_RUN_TEST(caseNameOrIndex) \
+	UnitTestRegisterIns.run(caseNameOrIndex);
 
 #define CEX_TEST(caseName) \
 	void ctx##caseName(); \

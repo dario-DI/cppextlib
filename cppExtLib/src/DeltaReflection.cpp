@@ -16,20 +16,4 @@ namespace cex
 	{
 		return UIntDeltaRegisterSingletonHolder::Instance();
 	}
-
-
-#if 0
-	
-
-	class UnitTester
-	{
-	public:
-		UnitTester()
-		{
-			test();
-		}
-	};
-
-	static UnitTester tester;
-#endif 
 }

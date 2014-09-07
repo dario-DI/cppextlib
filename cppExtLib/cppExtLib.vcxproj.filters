@@ -13,11 +13,11 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="src">
-      <UniqueIdentifier>{047885c0-2d74-46a8-bba3-0ba49e75d84a}</UniqueIdentifier>
-    </Filter>
     <Filter Include="cex">
       <UniqueIdentifier>{9637be91-4d78-43dc-8a74-10881fce704a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{047885c0-2d74-46a8-bba3-0ba49e75d84a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -59,10 +59,10 @@
     <ClCompile Include="src\DeltaReflection.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\MessageMapCom.cpp">
+    <ClCompile Include="src\UnTest.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\UnTest.cpp">
+    <ClCompile Include="src\MessageMapCom.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>

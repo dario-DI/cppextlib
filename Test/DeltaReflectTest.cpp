@@ -15,7 +15,7 @@ REGIST_DELTA2( _T("INT2"), (int*)s_ptrInt)
 REGIST_DELTA( _T("INTSPACE1"), 2013, (int*)s_ptrInt)
 REGIST_DELTA( _T("INTSPACE2"), _T("myIntPtr2"), (int*)s_ptrInt)
 
-	int* s_refPtrInt=new int(1);
+int* s_refPtrInt=new int(1);
 REGIST_DELTA_REFPTR2(1001, (int*)s_refPtrInt)
 //REGIST_DELTA_REFPTR2(1002, (int*)s_refPtrInt) //will cause exception at runtime.
 
@@ -34,10 +34,6 @@ REGIST_DELTA(_T("MyLib"), _T("Foo2"), &Foo)
 
 CEX_TEST(DeltaReflectTest)
 {
-	/////////////////////////////////////
-	// test int pointer
-
-	// ref ptr
 	{
 		int* myIntPtr = DeltaCast<int*>(1001);
 		assert( (*myIntPtr) == 1 );
