@@ -69,6 +69,9 @@ REGIST_DELTA_CREATOR(IMyInterface, IMyImplement)
 IMyInterface* obj = DeltaCreate<IMyInterface>();
 DeltaDestory(obj);
 
+boost::shared_ptr<IMyInterface> refPtr;
+DeltaCreateRef<IMyInterface>(refPtr);
+
 */
 #pragma endregion
 

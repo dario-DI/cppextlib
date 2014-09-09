@@ -1,6 +1,8 @@
 /// \file Delegate.hpp Copyright (C)
-/// \brief Î¯ÍÐc++ÊµÏÖ
+/// \brief delegate implement in c++
 ///
+///	Delegate<bool(const string&)> myDelegate;
+/// myDelegate += [](const string& v){return true;}
 ///
 /// \note: 
 /// \author: DI
