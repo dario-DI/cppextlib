@@ -3,6 +3,8 @@
 #include <cex/DeltaReflection.h>
 #include <cex/UnTest.h>
 
+using namespace cex;
+
 ////////////////////////////
 static int s_myInt=1;
 static int* s_ptrInt=&s_myInt;
@@ -15,12 +17,28 @@ REGIST_DELTA2( _T("INT2"), (int*)s_ptrInt)
 REGIST_DELTA( _T("INTSPACE1"), 2013, (int*)s_ptrInt)
 REGIST_DELTA( _T("INTSPACE2"), _T("myIntPtr2"), (int*)s_ptrInt)
 
-int* s_refPtrInt=new int(1);
-REGIST_DELTA_REFPTR2(1001, (int*)s_refPtrInt)
-//REGIST_DELTA_REFPTR2(1002, (int*)s_refPtrInt) //will cause exception at runtime.
+class Test0 : public Interface
+{
+};
 
-///////////////////////////
-using namespace cex;
+class Test1 : public Test0
+{
+public:
+	int v;
+	Test1() : v(0) {}
+};
+
+REGIST_DELTA_CREATOR(Test0, Test1)
+
+class Test2 : public Interface
+{
+public:
+	int v;
+	Test2() : v(0) {}
+};
+
+REGIST_DELTA_INSTANCE(Test2, Test2);
+
 
 void Foo(int& n)
 {
@@ -34,14 +52,6 @@ REGIST_DELTA(_T("MyLib"), _T("Foo2"), &Foo)
 
 CEX_TEST(DeltaReflectTest)
 {
-	{
-		int* myIntPtr = DeltaCast<int*>(1001);
-		assert( (*myIntPtr) == 1 );
-		int** ptr = DeltaPTRCast<int*>(1001);
-		assert((*ptr)==myIntPtr);
-		(*myIntPtr)+=1;
-	}
-
 	{
 		int* myIntPtr = DeltaCast<int*>(1000);
 		assert( (*myIntPtr) == 1 );
@@ -130,4 +140,41 @@ CEX_TEST(DeltaReflectTest)
 		method(testNum);
 		assert(testNum==3);
 	}
+
+	// test creator
+	{
+		Test0* test0 = DeltaCreate<Test0>();
+		Test1* test1 = dynamic_cast<Test1*>(test0);
+		assert(test1!=nullptr);
+		test1->v = 9;
+
+		Test0* test01 = DeltaCreate<Test0>();
+		test1 = dynamic_cast<Test1*>(test01);
+		assert(test1!=nullptr);
+		test1->v = 8;
+
+		DeltaDestory(test0);
+		DeltaDestory(test01);
+
+		// test ref create
+		boost::shared_ptr<Test0> test00;
+		DeltaCreateRef(test00);
+		test1 = dynamic_cast<Test1*>(test00.get());
+		assert(test1!=nullptr);
+
+		boost::shared_ptr<Test0> test001;
+		DeltaCreateRef(test001);
+		test1 = dynamic_cast<Test1*>(test001.get());
+		assert(test1!=nullptr);
+
+
+		// test instance
+		Test2* test2 = DeltaInstance<Test2>();
+		assert(test2!=nullptr);
+		test2->v = 2;
+	}
+	
+	
+
+	
 }

@@ -12,44 +12,62 @@
 #pragma region example_usage
 /*example usage
 
-// 注册函数
+// 1 注册一个函数
 {
-	void Foo(int k)
-	{
-		// do something
-	}
+void Foo(int k)
+{
+// do something
+}
 
-	// 在cpp文件中注册Foo
-	REGIST_DELTA( "MyLib", "Foo", &Foo);
+// 在cpp文件中注册Foo
+REGIST_DELTA( "MyLib", "Foo", &Foo);
 }
 
 // 使用函数
 {
-	typedef void (*MethodType)(int);
+typedef void (*MethodType)(int);
 
-	MethodType func = DeltaCast<MethodType>("MyLib", "Foo");
+MethodType func = DeltaCast<MethodType>("MyLib", "Foo");
 
-	func(2);
+func(2);
 }
 
-// 注册一个类，并使用此类的单件
-class IMyInterface
+// 2 注册一个类，并使用此类的单件
+class IInstance : public Interface
 {
 public:
-	virtual void foo()=0;
+virtual void foo()=0;
 };
 
-class MyImplement : public IMyInterface
+class InstanceImpl : public Instance
 {
 public:
-	void foo() {}
+void foo() {}
 }
 
 // 注册
-REGIST_DELTA_INSTANCE(IMyInterface, MyImplement)
+REGIST_DELTA_INSTANCE(IInstance, InstanceImpl)
 
 // 使用单件对象
-IMyInterface instance = cex::DeltaInstance<IMyInterface>();
+Instance instance = cex::DeltaInstance<Instance>();
+
+// 3 注册一个类工厂
+class IMyInterface : public Interface
+{
+}
+
+class IMyImplement : public IMyInterface
+{
+public:
+	int k;
+}
+
+// 注册
+REGIST_DELTA_CREATOR(IMyInterface, IMyImplement)
+
+// 使用
+IMyInterface* obj = DeltaCreate<IMyInterface>();
+DeltaDestory(obj);
 
 */
 #pragma endregion
@@ -69,12 +87,14 @@ IMyInterface instance = cex::DeltaInstance<IMyInterface>();
 // 所有的注册key声明宏，约定以DELTA_REGKEY_开头，便于统一搜索查看
 // 并且约定，手动添加字符串key，均已大写表示。
 
-#define DELTA_REGKEY_SYS_REGREFPTR "DELTASYS_REGREFPTR"
-#ifdef _WIN64
-#	define DELTA_REGKEY_SYS_INSTANCE ULONG_PTR(1)
-#else
-#	define DELTA_REGKEY_SYS_INSTANCE 1U
-#endif
+// 对象生命周期管理者主键
+#define DELTA_REGKEY_SYS_REGREFPTR "SYS0"
+
+// 接口创建工厂注册主键
+#define DELTA_REGKEY_SYS_INTERFACE_CREATOR "SYS1"
+
+// 单件对象注册主键
+#define DELTA_REGKEY_SYS_INSTANCE "SYS2"
 
 namespace cex
 {
@@ -226,7 +246,7 @@ namespace cex
 
 		// template cast
 		template<typename DeltaType, typename KeyType>
-			DeltaType TGetRegValue(
+		DeltaType TGetRegValue(
 			KeyValueRegister<KeyType, boost::any, UniqueTypeofDeltaRegister>& reg,
 			const KeyType& key)
 		{
@@ -247,7 +267,7 @@ namespace cex
 		}
 
 		template<typename DeltaType, typename KeyType>
-			DeltaType* TGetRegValuePTR(
+		DeltaType* TGetRegValuePTR(
 			KeyValueRegister<KeyType, boost::any, UniqueTypeofDeltaRegister>& reg,
 			const KeyType& key)
 		{
@@ -266,13 +286,15 @@ namespace cex
 		}
 	}
 
+	// get copy value by the given key
 	template<typename DeltaType, typename KeyType>
-		DeltaType DeltaCast(const KeyType& key)
+	DeltaType DeltaCast(const KeyType& key)
 	{
 		return df::TGetRegValue<DeltaType>(df::TTypeTraits<KeyType>::Instance(), 
 			df::TTypeTraits<KeyType>::Convert(key));
 	}
 
+	// get pointer of value by the given key
 	template<typename DeltaType, typename KeyType>
 	DeltaType* DeltaPTRCast(const KeyType& key)
 	{
@@ -333,6 +355,13 @@ namespace cex
 			Traits::Instance().Regist(Traits::Convert(key), value);
 		}
 
+		template<typename DeltaType, typename KeyType>
+		void UnRegister(const KeyType& key, const DeltaType& value)
+		{
+			typedef df::TTypeTraits<KeyType> Traits;
+			Traits::Instance().UnRegist(Traits::Convert(key), value);
+		}
+
 		template<typename DeltaType, typename libKeyType, typename valueKeyType>
 		void Register(const libKeyType& libKey, const valueKeyType& valueKey, const DeltaType& value)
 		{
@@ -349,9 +378,9 @@ namespace cex
 			{
 				// no register for this lib key, just register
 				LibTraits::Instance().Regist(LibTraits::Convert(libKey), ValueTraits::RegType());
+				reg = DeltaPTRCast<ValueTraits::RegType>(LibTraits::Convert(libKey));
 			}
-
-			reg = DeltaPTRCast<ValueTraits::RegType>(LibTraits::Convert(libKey));
+			
 			assert(reg != NULL);
 
 			// register value to the lib register
@@ -369,105 +398,259 @@ namespace cex
 #endif
 			reg->Regist(ValueTraits::Convert(valueKey), value);
 		}
+
+		template<typename DeltaType, typename libKeyType, typename valueKeyType>
+		void UnRegister(const libKeyType& libKey, const valueKeyType& valueKey, const DeltaType& value)
+		{
+			typedef df::TTypeTraits<libKeyType> LibTraits;
+			typedef df::TTypeTraits<valueKeyType> ValueTraits;
+
+			// find library register
+			ValueTraits::RegType* reg = NULL;
+			try
+			{
+				reg = DeltaPTRCast<ValueTraits::RegType>(LibTraits::Convert(libKey));
+			}
+			catch(std::exception e)
+			{
+				return;
+			}
+
+			assert(reg != NULL);
+
+			reg->UnRegist(ValueTraits::Convert(valueKey), value);
+		}
 	}
 
 	class DeltaRegisterProxy
 	{
 	public:
 		template<typename DeltaType, typename KeyType>
-			DeltaRegisterProxy(const KeyType& key, const DeltaType& value)
+		DeltaRegisterProxy(const KeyType& key, const DeltaType& value)
 		{
 			reg::Register(key, value);
 		}
 
 		template<typename DeltaType, typename LibKeyType, typename ValueKeyType>
-			DeltaRegisterProxy(const LibKeyType& libKey, const ValueKeyType& valueKey, const DeltaType& value)
+		DeltaRegisterProxy(const LibKeyType& libKey, const ValueKeyType& valueKey, const DeltaType& value)
 		{
 			reg::Register(libKey, valueKey, value);
 		}
 	};
 
-	class DeltaRegisterRefPtrProxy
+#pragma region refrenced_object_pointer_handler
+	
+	class Interface
 	{
 	public:
-		typedef std::vector<boost::any> DeltaSysRefPtrContainer;
+		virtual ~Interface()=0{}
+	};
 
-		DeltaSysRefPtrContainer* getOrCreateDeltaSysRefPtrContainer()
+	class InterfaceCreator
+	{
+	public:
+		virtual Interface* create()=0;
+		virtual void destory(Interface*)=0;
+
+		virtual Interface* createPure()=0;
+	};
+
+	template<typename T>
+	class TInterfaceCreator : public InterfaceCreator
+	{
+	public:
+		virtual Interface* create()
 		{
-			try
-			{
-				return DeltaPTRCast<DeltaSysRefPtrContainer>(DELTA_REGKEY_SYS_REGREFPTR);
-			}
-			catch(std::exception e)
-			{
-				// no register for this lib key, just register
-				StringDeltaRegisterSingleton().Regist(DELTA_REGKEY_SYS_REGREFPTR, DeltaSysRefPtrContainer());
-				return DeltaPTRCast<DeltaSysRefPtrContainer>(DELTA_REGKEY_SYS_REGREFPTR);
-			}
+			return DeltaRefPtrContainer::addObject(new T());
 		}
 
-		bool IsExisted(boost::any& v)
+		virtual void destory(Interface* v)
 		{
-#ifdef BOOST_NO_MEMBER_TEMPLATE_FRIENDS
-			DeltaSysRefPtrContainer* container = getOrCreateDeltaSysRefPtrContainer();
-			DeltaSysRefPtrContainer::iterator itr =container->begin();
+			DeltaRefPtrContainer::removeObject(v);
+		}
 
-			boost::any::holder<char*>* ptrv = reinterpret_cast<
-				boost::any::holder<char*>*>(v.content);
+		virtual Interface* createPure()
+		{
+			return new T();
+		}
+	};
 
-			for (; itr!=container->end(); ++itr)
+	// 对象生命周期管理者容器
+	class DeltaRefPtrContainer
+	{
+	public:
+		typedef boost::shared_ptr<Interface> PtrType;
+		typedef std::vector<PtrType> DeltaSysRefPtrContainer;
+
+		static bool IsExisted(Interface* obj)
+		{
+			DeltaSysRefPtrContainer& container = getOrCreateContainer();
+			for (auto v : container)
 			{
-				boost::any::holder<char*>* ptr2 = reinterpret_cast<
-					boost::any::holder<char*>*>(itr->content);
-
-				if (ptrv->held == ptr2->held)
+				if (obj == v.get())
 				{
 					return true;
 				}
 			}
 
 			return false;
-#else
-			return false;
-#endif
 		}
 
-		// ref ptr
-		template<typename DeltaType, typename KeyType>
-			DeltaRegisterRefPtrProxy(const KeyType& key, DeltaType* value)
+		static Interface* addObject(Interface* obj)
 		{
-			reg::Register(key, value);
-
-			boost::any anyValue = boost::shared_ptr<DeltaType>(value);
-
-#ifdef _DEBUG
-			if (IsExisted(anyValue))
-			{
-				assert(false); // same pointer register. it will issues exception at the end of program.
-			}
-#endif
-
-			getOrCreateDeltaSysRefPtrContainer()->push_back(anyValue);
+			getOrCreateContainer().push_back(PtrType(obj));
+			return obj;
 		}
 
-		// ref ptr
-		template<typename DeltaType, typename LibKeyType, typename ValueKeyType>
-			DeltaRegisterRefPtrProxy(const LibKeyType& libKey, const ValueKeyType& valueKey, DeltaType* value)
+		static void removeObject(Interface* obj)
 		{
-			reg::Register(libKey, valueKey, value);
+			DeltaSysRefPtrContainer& container = getOrCreateContainer();
 
-			boost::any anyValue = boost::shared_ptr<DeltaType>(value);
-
-#ifdef _DEBUG
-			if (IsExisted(anyValue))
+			container.erase(
+				std::remove_if(container.begin(), container.end(), 
+				[&obj](const PtrType& v)
 			{
-				assert(false); // same pointer register. it will issues exception at the end of program.
-			}
-#endif
+				if (v.get()==obj) return true;
+				else return false;
+			}));
+		}
 
-			getOrCreateDeltaSysRefPtrContainer()->push_back(anyValue);
+	private:
+		static DeltaSysRefPtrContainer& getOrCreateContainer()
+		{
+			DeltaSysRefPtrContainer* ptr = nullptr;
+
+			try
+			{
+				ptr = DeltaPTRCast<DeltaSysRefPtrContainer>(DELTA_REGKEY_SYS_REGREFPTR);
+			}
+			catch (std::exception e)
+			{
+				reg::Register(DELTA_REGKEY_SYS_REGREFPTR, DeltaSysRefPtrContainer());
+				ptr = DeltaPTRCast<DeltaSysRefPtrContainer>(DELTA_REGKEY_SYS_REGREFPTR);
+			}
+			
+			assert(ptr!=nullptr);
+
+			return *ptr;
 		}
 	};
+
+	// 对象创建工厂注册代理
+	template<typename IType, typename RType=IType>
+	class InterfaceCreatorRegistProxy
+	{
+	public:
+		typedef TInterfaceCreator<IType> ITypeCreator;
+		typedef TInterfaceCreator<RType> RTypeCreator;
+
+		InterfaceCreatorRegistProxy()
+		{
+			boost::shared_ptr<InterfaceCreator> pCreator = 
+				boost::shared_ptr<InterfaceCreator>((InterfaceCreator*)(new RTypeCreator()));
+
+			reg::Register(DELTA_REGKEY_SYS_INTERFACE_CREATOR, 
+				typeid(ITypeCreator).name(), pCreator);
+		}
+	};
+
+	template<typename T>
+	T* DeltaCreate()
+	{
+		typedef TInterfaceCreator<T> ITypeCreator;
+
+		try
+		{
+			boost::shared_ptr<InterfaceCreator> pCreator = DeltaCast<boost::shared_ptr<InterfaceCreator> >(
+				DELTA_REGKEY_SYS_INTERFACE_CREATOR, 
+				typeid(ITypeCreator).name());
+
+			if (pCreator.get() == nullptr) 
+			{
+				assert(false);
+				return nullptr;
+			}
+
+			return dynamic_cast<T*>(pCreator->create());
+		}
+		catch(std::exception e)
+		{
+			assert(false);  // no given type creator has been registed, or type error;
+			return nullptr;
+		}
+	}
+
+	template<typename T>
+	void DeltaDestory(T* v)
+	{
+		typedef TInterfaceCreator<T> ITypeCreator;
+
+		try
+		{
+			boost::shared_ptr<InterfaceCreator> pCreator = DeltaCast<boost::shared_ptr<InterfaceCreator> >(
+				DELTA_REGKEY_SYS_INTERFACE_CREATOR, 
+				typeid(ITypeCreator).name());
+
+			if (pCreator.get() == nullptr) return;
+
+			pCreator->destory(v);
+		}
+		catch(std::exception e)
+		{
+			assert(false);  // no given type creator has been registed, or type error;
+		}
+	}
+
+	template<typename T>
+	boost::shared_ptr<T> DeltaCreateRef(boost::shared_ptr<T>& refPtr)
+	{
+		typedef TInterfaceCreator<T> ITypeCreator;
+
+		try
+		{
+			boost::shared_ptr<InterfaceCreator> pCreator = DeltaCast<boost::shared_ptr<InterfaceCreator> >(
+				DELTA_REGKEY_SYS_INTERFACE_CREATOR, 
+				typeid(ITypeCreator).name());
+
+			if (pCreator.get() == nullptr) 
+			{
+				assert(false);
+				return boost::shared_ptr<T>();
+			}
+
+			T* v = dynamic_cast<T*>(pCreator->createPure());
+			refPtr = boost::shared_ptr<T>(v);
+			return refPtr;
+		}
+		catch(std::exception e)
+		{
+			assert(false);  // no given type creator has been registed, or type error;
+			return boost::shared_ptr<T>();
+		}
+	}
+
+	// 对象单件注册代理(初始化次序的不确定, 静态变量内部不能引用其它静态变量)
+	template<typename IType, typename RType>
+	class DeltaObjInstanceRegistProxy
+	{
+	public:	
+		DeltaObjInstanceRegistProxy()
+		{
+			IType* value = (IType*)new RType();
+
+			reg::Register(DELTA_REGKEY_SYS_INSTANCE, typeid(IType*).name(), value);
+
+			DeltaRefPtrContainer::addObject(value);
+		};
+	};
+
+	template<typename T>
+	T* DeltaInstance()
+	{
+		return DeltaCast<T*>(DELTA_REGKEY_SYS_INSTANCE, typeid(T*).name());
+	}
+
+#pragma endregion 
 
 #define REGIST_DELTA2(key, value) \
 	static cex::DeltaRegisterProxy MT_SEQUENCE_NAME(key, value);
@@ -475,20 +658,11 @@ namespace cex
 #define REGIST_DELTA(libKey, valueKey, value) \
 	static cex::DeltaRegisterProxy MT_SEQUENCE_NAME(libKey, valueKey, value);
 
-#define REGIST_DELTA_REFPTR2(key, value) \
-	static cex::DeltaRegisterRefPtrProxy MT_SEQUENCE_NAME(key, value);
-
-#define REGIST_DELTA_REFPTR(libKey, valueKey, value) \
-	static cex::DeltaRegisterRefPtrProxy MT_SEQUENCE_NAME(libKey, valueKey, value);
+#define REGIST_DELTA_CREATOR(IType, RType) \
+	static cex::InterfaceCreatorRegistProxy<IType, RType> MT_SEQUENCE_NAME;
 
 #define REGIST_DELTA_INSTANCE(IType, RType) \
-	REGIST_DELTA_REFPTR(DELTA_REGKEY_SYS_INSTANCE, typeid(IType*).name(), (IType*)new RType())
-
-	template<typename T>
-		T* DeltaInstance()
-	{
-		return DeltaCast<T*>(DELTA_REGKEY_SYS_INSTANCE, typeid(T*).name());
-	}
+	static cex::DeltaObjInstanceRegistProxy<IType, RType> MT_SEQUENCE_NAME;
 
 }
 

@@ -17,3 +17,4 @@ namespace cex
 		return UIntDeltaRegisterSingletonHolder::Instance();
 	}
 }
+

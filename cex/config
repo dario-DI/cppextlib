@@ -12,7 +12,8 @@
 #define CEX_API __declspec(dllexport)
 #endif
 
-#define _3RDPARTY_PATH_
+#define _3RDPARTY_PATH_ "..\\3rdParty\\lua\\"
+#define _LUA_LIB_ "lua51"
 
 #pragma warning ( disable : 4099 )
 #pragma warning ( disable : 4150 )

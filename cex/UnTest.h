@@ -18,11 +18,9 @@
 
 namespace cex
 {
-	class IUnitTestMethodRegister
+	class IUnitTestMethodRegister : public Interface
 	{
 	public:
-		virtual ~IUnitTestMethodRegister()=0 {}
-
 		typedef void (*TestFun)();
 
 		virtual void addCase(const std::string& caseName, const TestFun& fun)=0;
@@ -63,6 +61,14 @@ namespace cex
 #define CEX_EXPECT_EQ(v1, v2) \
 	if (v1 != v2) {\
 		std::cout<<"failed! Expect: "<< v1 <<", Actual: "<< v2 << std::endl;	}
+
+#define CEX_EXCEPTION_TRUE(context) \
+	try {context;} catch(...) { \
+	std::count<<"failed! expecting true, but catch exception: " << #context << std::endl; }
+
+#define CEX_EXCEPTION_FALSE(context) \
+	try {context; std::count<<"failed! expecting exception, but not: " << #context << std::endl;} \
+	catch(...) {}
 
 }
 

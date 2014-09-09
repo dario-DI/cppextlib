@@ -1,48 +1,45 @@
-/// \file ConfigVar.h Copyright (C) Sharewin Inc.
-/// \brief 全局变量配置
+/// \file ConfigVar.h Copyright (C).
+/// \brief configurable variable by configure file. 
 ///
 ///
 /// \note:
 /// \author: DI
 /// \time: 2011/8/30 9:46
-#ifndef _TDE_CONFIGVAR_
-#define _TDE_CONFIGVAR_
+#ifndef _CEX_CONFIGVAR_H_
+#define _CEX_CONFIGVAR_H_
 
-#if 0
+#pragma region example_usage
+/*
 
-namespace example_code
+/// 获取变量
+if ( GET_bool(sw::shader_use) )
 {
-	/// 变量使用方法
-
-	/// 获取变量
-	if ( GET_bool(sw::shader_use) )
-	{
-		// do something
-	}
-
-	if ( GET_int( great::overview_width ) > 256 ) {}
-
-	float fLight1_diffuse = GET_float( light1_diffuse );
-	std::string str = GET_string( seismic::label2 );
-
-	/// 界面化修改seismic命名空间下的所有变量
-	cex::ShowDlg::ShowDlgVarEdit( "seismic" );
-
-	/// 设置某一变量的值，并保存到文件
-	SET_var( great::overview_width,  150 );
-	
-	///-------------------------------------------------------
-
-	/// 注册变量方法
-	/// 在源文件中，添加命名空间与变量. 使用时 不 需要对文件名引用
-	BEGIN_REGIST_VAR_TABLE_V( seismic, 1 )
-		REGIST_bool(shader_use, true,			"着色语言开关")
-		REGIST_int(overview_width, 256,			"全局视图宽")
-		REGIST_string(label,  "字符串",			"提示信息")
-	END_REGIST_VAR_TABLE
+	// do something
 }
 
-#endif
+if ( GET_int( great::overview_width ) > 256 ) {}
+
+float fLight1_diffuse = GET_float( light1_diffuse );
+std::string str = GET_string( d3::label2 );
+
+/// 界面化修改seismic命名空间下的所有变量
+cex::ShowDlg::ShowDlgVarEdit( "abc" );
+
+/// 设置某一变量的值，并保存到文件
+SET_var( great::overview_width,  150 );
+
+///-------------------------------------------------------
+
+/// 注册变量方法
+/// 在源文件中，添加命名空间与变量. 使用时 不 需要对文件名引用
+BEGIN_REGIST_VAR_TABLE_V( d3, 1 )
+	REGIST_bool(abc, true,			"abc")
+	REGIST_int(abc2, 256,			"abc2")
+	REGIST_string(abc3,  "abc3",			"abc3")
+END_REGIST_VAR_TABLE
+
+*/
+#pragma endregion
 
 #pragma once
 #include <cex/Config>
@@ -70,12 +67,12 @@ namespace example_code
 #define BEGIN_REGIST_VAR_TABLE_V( domain_name, version ) \
 	BEGIN_REGIST_VAR_TABLE(cex::ConfigDomainType(#domain_name)+"::", cex::ConfigDomainType(#domain_name)+VERSION_LINK_IN_VAR_TABLE_REGIST+#version )
 
-/// domain_name: 在文件操作ConfigVarRW中，即文件读取、写入时起作用。每一个var_name_space对应一个文件。
-/// var_name_space: var_name_space决定了domain_name。当var_name_space是""时，使用GLOBAL_VAR_DOMAIN作为domain_name。
-///					当使用版本号时，var_name_space将与版本号一起决定domain_name。
-///	var_name:	var_name_space将作与变量融合为一个整体:"var_name_space::var_name"，作为一个变量名字符串使用。
+	/// domain_name: 在文件操作ConfigVarRW中，即文件读取、写入时起作用。每一个var_name_space对应一个文件。
+	/// var_name_space: var_name_space决定了domain_name。当var_name_space是""时，使用GLOBAL_VAR_DOMAIN作为domain_name。
+	///					当使用版本号时，var_name_space将与版本号一起决定domain_name。
+	///	var_name:	var_name_space将作与变量融合为一个整体:"var_name_space::var_name"，作为一个变量名字符串使用。
 #define BEGIN_REGIST_VAR_TABLE(var_name_space, config_file_name) namespace{ \
-	class CRegistVarProxy { public: CRegistVarProxy(); }; \
+class CRegistVarProxy { public: CRegistVarProxy(); }; \
 	static CRegistVarProxy s_CRegistVarProxy; \
 	CRegistVarProxy::CRegistVarProxy() { \
 	cex::ConfigDomainType strVarNameSpace = var_name_space; \
@@ -105,21 +102,21 @@ namespace example_code
 #define END_REGIST_VAR_TABLE \
 	if ( bEnableRegistDomainInfo ) { pRW->SaveVar2File(domainName); } } }
 
-//#define VAR_USE_NAMESPACE(name_space) \
-//	static char* __decl_var_name_space() { return #name_space; }
-//
-//template<typename T>
-//std::string __get_var_name_space(const T& valueName)
-//{
-//	__if_exists( __decl_var_name_space )
-//	{
-//		return __decl_var_name_space() + "::" + valueName;
-//	}
-//
-//	return valueName;
-//}
-//
-//#define VAR_OUT_NAME_SPACE( var ) __get_var_name_space(#var)
+	//#define VAR_USE_NAMESPACE(name_space) \
+	//	static char* __decl_var_name_space() { return #name_space; }
+	//
+	//template<typename T>
+	//std::string __get_var_name_space(const T& valueName)
+	//{
+	//	__if_exists( __decl_var_name_space )
+	//	{
+	//		return __decl_var_name_space() + "::" + valueName;
+	//	}
+	//
+	//	return valueName;
+	//}
+	//
+	//#define VAR_OUT_NAME_SPACE( var ) __get_var_name_space(#var)
 #define VAR_OUT_NAME_SPACE( var ) #var
 
 #define GET_bool( var ) \
@@ -137,7 +134,7 @@ namespace example_code
 #define  SET_var( var, value ) \
 	cex::VarRegisterUtil::SetVar( #var, value )
 
-////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////
 struct lua_State;
 
 namespace cex
@@ -149,7 +146,7 @@ namespace cex
 	////////////////////////////////////////////
 	//	class ConfigVar
 	template<typename DataType>
-	class ConfigVar
+	class IConfigVar : public Interface
 	{
 	public:
 		typedef std::string		NameType;
@@ -160,75 +157,26 @@ namespace cex
 
 		typedef DataType DataType;
 
-		ConfigVar()
-		{
-			_rw = CONFIGVARRW_REGISTER_INS;
-			_rw->RegisterLoadValueFunc(boost::bind( &DataType::LoadValueFunc, _1 ));
-		}
-
-		~ConfigVar()
-		{
-		}
-
 	public:
-		void RegistVar( 
+		virtual void RegistVar( 
 			const ConfigDomainType& domain, const NameType& name, 
-			const ValueType& value, const ConfigCommentType& comment )
-		{
-#ifdef _DEBUG
-			Var_Map::iterator itrVar = _varMap.find( name );
-			assert( itrVar == _varMap.end() );	//	a variable with the same name has been already registered.
-#endif
+			const ValueType& value, const ConfigCommentType& comment )=0;
 
-			_varMap[name] = value;
+		virtual ValueType GetVar( const NameType& varName )=0;
+		
+		virtual void SetVar( const NameType& name, const ValueType& value )=0;
 
-			_rw->RegistDomain( domain, name, DataType::Value2String(value), comment );
-		}
+		virtual void SetVarPure( const NameType& name, const ValueType& value )=0;
 
-		ValueType GetVar( const NameType& varName )
-		{
-			_rw->TryLoadVarFromFile();
-
-			Var_Map::const_iterator varItr = _varMap.find( varName );
-
-			if ( varItr == _varMap.end() )
-			{
-#ifdef _DEBUG
-				AfxMessageBox( CString(varName.c_str()) + _T(": 未注册的变量.") );
-#endif
-				throw( std::invalid_argument( varName+": can not find." ) );
-			}
-
-			return varItr->second;	
-		}
-
-		void SetVar( const NameType& name, const ValueType& value )
-		{
-#ifdef _DEBUG
-			Var_Map::iterator itrVar = _varMap.find( name );
-			assert( itrVar != _varMap.end() );	//	a variable must has been already registered.
-#endif
-			_varMap[name] = value;
-
-			_rw->UpdateVarInfo( name, DataType::Value2String(value) );
-		}
-
-	protected:
-
-		Var_Map _varMap;
-		IConfigVarRW* _rw;
 	};	
 
 
 	////////////////////////////////////////////
 	//	class ConfigVarRWByLua
 	//	注意：类接口中使用的变量名均包含namespace
-	class CEX_IMPORT IConfigVarRW
+	class IConfigVarRW : public Interface
 	{
 	public:
-		IConfigVarRW() {}
-		virtual ~IConfigVarRW()=0 {}
-
 		typedef std::string DomainType;
 
 		typedef boost::function<bool(lua_State*)> LoadValueFunc;
@@ -243,25 +191,19 @@ namespace cex
 			VarInfo() {}
 
 			VarInfo(const DomainType& n, const DomainType& v, const DomainType& c) :
-			name(n), value(v), comment(c)
+				name(n), value(v), comment(c)
 			{}
 		};
 
 		typedef std::vector<VarInfo> VarInfoList;
 		typedef std::map<DomainType, VarInfoList > Var_Domain_Map;
 
-		void RegisterLoadValueFunc(const LoadValueFunc& func)
-		{
-			_LoadValueFuncList.push_back( func );
-		}
+		virtual void RegisterLoadValueFunc(const LoadValueFunc& func)=0;
 
-		const LoadValueFuncList& GetLoadValueFuncList() const 
-		{ 
-			return _LoadValueFuncList;
-		}
+		virtual const LoadValueFuncList& GetLoadValueFuncList() const =0;
 
 		// 注意: 使用前，应使用TryLoadVarFromFile，从文件中获取改变后的变量
-		VarInfoList& GetDomianVars(const DomainType& domain) { return _domainMap[domain]; }
+		virtual VarInfoList& GetDomianVars(const DomainType& domain)=0;
 
 		// 注册变量信息
 		virtual void RegistDomain( const DomainType& domain, const DomainType& name, const DomainType& value, const DomainType& comment)=0;
@@ -280,14 +222,6 @@ namespace cex
 		virtual void LoadVarFromFile(const DomainType& domain)=0;
 
 		virtual bool IsConfigureFileExist(const DomainType& domain)=0;
-
-	protected:
-
-		LoadValueFuncList _LoadValueFuncList;
-
-		Var_Domain_Map _domainMap;
-
-		bool _bAlreadyLoadFile;
 
 	};
 
@@ -312,14 +246,14 @@ namespace cex
 			VarInfo() : value(0) {}
 
 			VarInfo(const VarType& n, ValueType num, const ConfigCommentType& c ) : 
-			name(n), value(num), comment(c) 
+				name(n), value(num), comment(c) 
 			{}
 
 		};
 	};
 
 	/// bool型变量
-	class CEX_IMPORT ConfigVarBooleanType : public ConfigVarTypeBase<bool>
+	class CEX_API ConfigVarBooleanType : public ConfigVarTypeBase<bool>
 	{
 	public:
 		static std::string Value2String(const ValueType& value);
@@ -327,7 +261,7 @@ namespace cex
 	};
 
 	/// float/int型变量
-	class CEX_IMPORT ConfigVarFloatType : public ConfigVarTypeBase<float>
+	class CEX_API ConfigVarFloatType : public ConfigVarTypeBase<float>
 	{
 	public:
 		static std::string Value2String(const ValueType& value);
@@ -335,25 +269,21 @@ namespace cex
 	};
 
 	/// string型变量
-	class CEX_IMPORT ConfigVarStringType : public ConfigVarTypeBase<std::string>
+	class CEX_API ConfigVarStringType : public ConfigVarTypeBase<std::string>
 	{
 	public:
 		static std::string Value2String(const ValueType& value);
 		static bool LoadValueFunc(lua_State* L);
 	};
 
-	typedef ConfigVar<ConfigVarBooleanType> ConfigVarBoolean;
-	typedef ConfigVar<ConfigVarFloatType> ConfigVarFloat;
-	typedef ConfigVar<ConfigVarStringType> ConfigVarString;
+	typedef IConfigVar<ConfigVarBooleanType> ConfigVarBoolean;
+	typedef IConfigVar<ConfigVarFloatType> ConfigVarFloat;
+	typedef IConfigVar<ConfigVarStringType> ConfigVarString;
 
 
-	class CEX_IMPORT VarRegisterUtil
+	class CEX_API VarRegisterUtil
 	{
 	public:
-		/// 设置变量值，并保存到文件中
-		static void SetVarValueAndSave(const std::string& varName, const std::string& value);
-
-		/// SET_var
 		static void SetVar( const std::string& varName, bool v);
 
 		static void SetVar( const std::string& varName, float v);
@@ -361,6 +291,8 @@ namespace cex
 		static void SetVar( const std::string& varName, int v);
 
 		static void SetVar( const std::string& varName, double v);
+
+		static void SetVar( const std::string& varName, const char* v);
 
 		static void SetVar( const std::string& varName, const std::string& v);
 	};

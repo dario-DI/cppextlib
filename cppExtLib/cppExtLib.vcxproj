@@ -86,8 +86,10 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\cex\ConfigVar.h" />
     <ClInclude Include="..\cex\Delegate.hpp" />
     <ClInclude Include="..\cex\DeltaReflection.h" />
+    <ClInclude Include="..\cex\LuaEx.h" />
     <ClInclude Include="..\cex\MessageMapCom.h" />
     <ClInclude Include="..\cex\MetaProgram.hpp" />
     <ClInclude Include="..\cex\UnTest.h" />
@@ -104,7 +106,9 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
       </PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="src\ConfigVar.cpp" />
     <ClCompile Include="src\DeltaReflection.cpp" />
+    <ClCompile Include="src\LuaEx.cpp" />
     <ClCompile Include="src\MessageMapCom.cpp" />
     <ClCompile Include="src\UnTest.cpp" />
     <ClCompile Include="stdafx.cpp">

@@ -45,6 +45,12 @@
     <ClInclude Include="..\cex\UnTest.h">
       <Filter>cex</Filter>
     </ClInclude>
+    <ClInclude Include="..\cex\LuaEx.h">
+      <Filter>cex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\cex\ConfigVar.h">
+      <Filter>cex</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -63,6 +69,12 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\MessageMapCom.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\LuaEx.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ConfigVar.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>

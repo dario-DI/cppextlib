@@ -86,6 +86,7 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ConfigVarTest.cpp" />
     <ClCompile Include="DeltaReflectTest.cpp" />
     <ClCompile Include="MessageMapTest.cpp" />
     <ClCompile Include="stdafx.cpp">

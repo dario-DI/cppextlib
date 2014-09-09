@@ -7,7 +7,7 @@
 /// \time: 2012/3/15 14:22
 
 #pragma region example_usage
-/* example usage
+/* 
  
 namespace example_usage
 {
@@ -407,11 +407,9 @@ namespace MessageMapCom
 
 	};
 
-	class IMessageRegist
+	class IMessageRegist : public cex::Interface
 	{
 	public:
-		virtual ~IMessageRegist()=0 {}
-
 		typedef boost::any update_function;
 		typedef size_t server_type;
 

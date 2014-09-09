@@ -1,21 +1,13 @@
 #include "stdafx.h"
+#include <stdio.h>
+#include <sstream>
+#include <shellapi.h>
 #include <cex/LuaEx.h>
 
-//load lua libary
-#if defined( _DEBUG )
-#define _LUA_LIB_  "lua\\lua5.1"
-#else
-//#define _LUA_LIB_  "3rdParty\\Lua\\lua5.1"
-#define _LUA_LIB_  "lua\\lua5.1"
-#endif // _DEBUG
 
-#if defined( _LUA_LIB_ )
+//load lua libary
 #pragma comment(lib, _3RDPARTY_PATH_  _LUA_LIB_ ".lib") 
 #pragma message("Automatically linking with " _3RDPARTY_PATH_ _LUA_LIB_ ".lib")
-#endif
-
-
-#include <stdio.h>
 
 using namespace cex;
 
@@ -44,7 +36,29 @@ namespace cex
 
 	};
 
-	extern std::string GetWorkPath(HMODULE hModule);
+	static std::string GetWorkPath(HMODULE hModule)
+	{
+		CHAR fileName[MAX_PATH+1];
+
+		GetModuleFileNameA(hModule, fileName, MAX_PATH);
+
+		std::string strFile( fileName );
+
+		int pos=0;
+
+		//	查找最后一个 '\' 符号
+		for(size_t i=0; i<strFile.length(); ++i)
+		{
+			if(strFile.at(i)=='\\')
+			{
+				pos=i;
+			}
+		}
+
+		std::string strPath( strFile.begin(), strFile.begin() + pos + 1 );
+
+		return strPath;
+	}
 
 	void error (lua_State *L, const char *fmt, ...)
 	{
@@ -66,53 +80,53 @@ namespace cex
 #endif
 	}
 
-//
-//	void Configcex()
-//	{
-//		const char* filename = "cexConfig.con";
-//
-//		lua_State* L = Util::LuaStateEx::::get();
-//		if ( L == NULL ) return;
-//
-//		if ( luaL_loadfile( L, filename ) ||
-//			lua_pcall( L, 0, 0, 0 ) != 0 //	解释读入文本
-//			)
-//		{
-//			assert(false);
-//			TRACE( _T("can not open file %s"), lua_tostring( L, -1 ) );
-//		}
-//
-//		lua_getglobal( L, "overview_width" );
-//		lua_getglobal( L, "overview_height" );
-//
-//		if ( !lua_isnumber( L, -2 ) ||
-//			 !lua_isnumber( L, -1 )
-//			)
-//		{
-//			assert( false );
-//		}
-//
-//		OVERVIEW_WIDTH = (int) lua_tonumber( L, -2 );
-//
-//		OVERVIEW_HEIGHT = (int) lua_tonumber( L, -1 );
-//	}
-//
-//	int luaC_messageBox( lua_State* L )
-//	{
-//		char message[256] = "";
-//
-//		int n = lua_gettop( L );
-//
-//		if ( lua_isstring( L, 1 ) )
-//		{
-//			strcpy( message, lua_tostring( L, 1 ) );
-//		}
-//
-//		MessageBoxA( NULL, message, "Lua Test", MB_OK );
-//
-//		return 0;
-//	}
-//
+	//
+	//	void Configcex()
+	//	{
+	//		const char* filename = "cexConfig.con";
+	//
+	//		lua_State* L = Util::LuaStateEx::::get();
+	//		if ( L == NULL ) return;
+	//
+	//		if ( luaL_loadfile( L, filename ) ||
+	//			lua_pcall( L, 0, 0, 0 ) != 0 //	解释读入文本
+	//			)
+	//		{
+	//			assert(false);
+	//			TRACE( _T("can not open file %s"), lua_tostring( L, -1 ) );
+	//		}
+	//
+	//		lua_getglobal( L, "overview_width" );
+	//		lua_getglobal( L, "overview_height" );
+	//
+	//		if ( !lua_isnumber( L, -2 ) ||
+	//			 !lua_isnumber( L, -1 )
+	//			)
+	//		{
+	//			assert( false );
+	//		}
+	//
+	//		OVERVIEW_WIDTH = (int) lua_tonumber( L, -2 );
+	//
+	//		OVERVIEW_HEIGHT = (int) lua_tonumber( L, -1 );
+	//	}
+	//
+	//	int luaC_messageBox( lua_State* L )
+	//	{
+	//		char message[256] = "";
+	//
+	//		int n = lua_gettop( L );
+	//
+	//		if ( lua_isstring( L, 1 ) )
+	//		{
+	//			strcpy( message, lua_tostring( L, 1 ) );
+	//		}
+	//
+	//		MessageBoxA( NULL, message, "Lua Test", MB_OK );
+	//
+	//		return 0;
+	//	}
+	//
 	//void RegistLuaCFun()
 	//{
 	//	lua_State* L = Util::LuaStateEx::get();
@@ -156,28 +170,28 @@ namespace cex
 
 	LUA_BEGIN_REGIST_LIB( GlobalLib )
 		LUA_REGIST_FUNC( Print )
-	LUA_END_REGIST_OPEN_LIB1( GlobalLib )
+		LUA_END_REGIST_OPEN_LIB1( GlobalLib )
 
-	//static const struct luaL_reg cexlib [] = 
-	//{
-	//	{"luaC_messageBoxEx", luaC_messageBoxEx},
-	//	//{"GetApp", GetcexApp},
-	//	//{"SetViewScale", SetcexViewSclae},
-	//	{"LuaC_RegistGloable", LuaC_RegistGloable},
-	//	{NULL, NULL}  /* sentinel */
-	//};
+		//static const struct luaL_reg cexlib [] = 
+		//{
+		//	{"luaC_messageBoxEx", luaC_messageBoxEx},
+		//	//{"GetApp", GetcexApp},
+		//	//{"SetViewScale", SetcexViewSclae},
+		//	{"LuaC_RegistGloable", LuaC_RegistGloable},
+		//	{NULL, NULL}  /* sentinel */
+		//};
 
-	//extern "C" int _declspec(dllexport) TL_FunctionExport(lua_State *L)
-	//{ 
-	//	luaL_openlib(L, "cex", mylibs, 0);
-	//	return 1;
+		//extern "C" int _declspec(dllexport) TL_FunctionExport(lua_State *L)
+		//{ 
+		//	luaL_openlib(L, "cex", mylibs, 0);
+		//	return 1;
 
-	//	//	call in lua as --assert( package.loadlib ("MFC_OSGud.dll", "TL_FunctionExport") ) ();
-	//	//	在LuaStateEx::get()中使用luaL_openlib(_L, "cex", mylibs, 0)代替了
-	//	//	这种方式不需要修改LuaConf.h中的 LUA_COMPAT_LOADLIB 配置
-	//}
+		//	//	call in lua as --assert( package.loadlib ("MFC_OSGud.dll", "TL_FunctionExport") ) ();
+		//	//	在LuaStateEx::get()中使用luaL_openlib(_L, "cex", mylibs, 0)代替了
+		//	//	这种方式不需要修改LuaConf.h中的 LUA_COMPAT_LOADLIB 配置
+		//}
 
-	void testLua()
+		void testLua()
 	{
 		//Configcex();
 		LuaStateAutoPtr luaState(new LuaState);
@@ -285,7 +299,7 @@ void LuaEx::GetField( lua_State* L,  LPCSTR key, void* ret, int type_flag )
 	case GTC_LP:
 		/*if ( lua_ispointer(L, -1) == false )
 		{
-			assert( false );
+		assert( false );
 		}*/
 		(*(LPVOID*)ret) = (LPVOID)lua_topointer(L, -1);
 		break;
@@ -315,7 +329,7 @@ void LuaEx::GetField( lua_State* L,  LPCSTR key, void* ret, int type_flag )
 		break;
 
 	case GTC_STRING:
-		strcpy( (char*)ret, lua_tostring(L, -1) );
+		strcpy_s( (char*)ret, sizeof(ret), lua_tostring(L, -1) );
 		break;
 
 	default:
@@ -333,28 +347,31 @@ void LuaEx::Setfenv( lua_State* L, LPCSTR newGlobal )
 
 	//lua_setmetatable(L, -2);
 
-	const char* code = 
-		"setmetatable(newgt, {__index=_G})\n"
-		"setfenv(0, newgt)";
+	//const char* code = 
+	//	"setmetatable(newgt, {__index=_G})\n"
+	//	"setfenv(0, newgt)";
 
 	///	setfenv(1, newgt) 不起作用，而setfenv(0, newgt)可以
 
-	CStringA strCode( code );
+	std::ostringstream oss;
+	oss << "setmetatable(newgt, {__index=_G})\n";
+	oss << "setfenv(0, ";
+	oss << newGlobal;
+	oss << ");";
 
-	strCode.Replace( "newgt", newGlobal );
+	std::string strCode = oss.str();
 
-	int r = DoString( L, strCode.GetBuffer(0) );
-	strCode.ReleaseBuffer();
+	int r = DoString( L, strCode.c_str() );
 
-    assert( r == 0 );	//	to see LUA_ERROR_FILE_NAME
+	assert( r == 0 );	//	to see LUA_ERROR_FILE_NAME
 }
 
 void LuaEx::ShowErrorInfo(int nType)
 {
-	ShellExecute(NULL, _T("open"), _T(LUA_ERROR_FILE_NAME), NULL, NULL, SW_SHOWNORMAL);
+	ShellExecuteA(NULL, "open", LUA_ERROR_FILE_NAME, NULL, NULL, SW_SHOWNORMAL);
 }
 
-////////////////////////////////////////////////////////
+#pragma region LuaState
 LuaState::LuaState()
 {
 	InitialObject( "_G" );
@@ -372,7 +389,7 @@ void LuaState::InitialObject(const std::string& lib)
 
 	luaL_openlibs(_L); //载入所有基本lua库
 
-	CLuaCLibRegister::Instance()->OpenLib( _L, lib );
+	cex::DeltaInstance<ILuaCLibRegister>()->OpenLib( _L, lib );
 }
 
 LuaState::~LuaState()
@@ -394,34 +411,56 @@ void LuaState::Close()
 	}
 }
 
-std::vector<CString> LuaState::GetFunctionName( const luaL_reg* reg )
+std::vector<std::string> LuaState::GetFunctionName( const luaL_reg* reg )
 {
-	std::vector<CString> vtName;
+	std::vector<std::string> vtName;
 
 	while ( reg != NULL && (*reg).name != NULL )
 	{
-		vtName.push_back( CString( (*reg).name ) );
+		vtName.push_back( std::string( (*reg).name ) );
 		++reg;
 	}
 
 	return vtName;
 }
 
+#pragma endregion
+
 ////////////////////////////////////////////////////////////////
-CLuaCLibRegister* CLuaCLibRegister::Instance()
+class CLuaCLibRegister : public ILuaCLibRegister
 {
-	static CLuaCLibRegister theInstance;
-	return &theInstance;
-}
+public:
+	void AddRegist( const std::string& lib, const LuaRegistLibFunc::FuncType& func )
+	{
+		_map[lib] += func;
+	}
 
-void CLuaCLibRegister::AddRegist( const std::string& lib, const LuaRegistLibFunc::FuncType& func )
+	void OpenLib( lua_State* L, const std::string& lib )
+	{
+		_map["_G"]( L );
+
+		_map[lib]( L );
+	}
+
+private:
+
+	FUNC_MAP _map;
+};
+
+namespace cex
 {
-	_map[lib] += func;
-}
+	ILuaCLibRegister* __stdcall getOrCreateLuaCLibRegister()
+	{
+		try
+		{
+			cex::DeltaCast<ILuaCLibRegister*>(DELTA_REGKEY_SYS_INSTANCE,
+				typeid(ILuaCLibRegister*).name());
+		}
+		catch(std::exception e)
+		{
+			cex::DeltaObjInstanceRegistProxy<ILuaCLibRegister, CLuaCLibRegister> temp;
+		}
 
-void CLuaCLibRegister::OpenLib( lua_State* L, const std::string& lib )
-{
-	_map["_G"]( L );
-
-	_map[lib]( L );
+		return cex::DeltaInstance<ILuaCLibRegister>();
+	}
 }

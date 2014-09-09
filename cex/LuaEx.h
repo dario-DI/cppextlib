@@ -1,11 +1,12 @@
-/// \file LuaEx.h Copyright (C) Sharewin Inc.
-/// \brief lua脚本扩展
+/// \file LuaEx.h Copyright (C).
+/// \brief lua extension
 ///
 ///
 /// \note:
 /// \author: DI
 /// \time: 2011/8/12 10:30
-#pragma once
+#ifndef _CEX_LUAEX_H_
+#define _CEX_LUAEX_H_
 
 extern "C"
 {
@@ -19,6 +20,7 @@ extern "C"
 #include <map>
 #include <cex/config>
 #include <cex/Delegate.hpp>
+#include <cex/DeltaReflection.h>
 
 //#include <boost/shared_ptr.hpp>
 
@@ -35,10 +37,10 @@ extern "C"
 namespace cex
 {
 #define LUA_OPEN_USER_LIB( spaceName, lib ) \
-	cex::CLuaRegistLibProxy s_LuaRegistLibProxy_##lib(spaceName, (luaL_reg*)lib);
+	static cex::CLuaRegistLibProxy s_LuaRegistLibProxy_##lib(spaceName, (luaL_Reg*)lib);
 
 #define LUA_BEGIN_REGIST_LIB( lib ) \
-	static const struct luaL_reg lib [] = {
+	static const struct luaL_Reg lib [] = {
 
 #define LUA_REGIST_FUNC( function ) {#function, function},
 
@@ -71,7 +73,7 @@ namespace cex
 #define LUA_DECL_WRAPPER( type_c, type_wrapper ) \
 	typedef cex::luaUserdataWrapper<type_c> type_wrapper;
 
-	class CEX_IMPORT LuaEx
+	class CEX_API LuaEx
 	{
 	public:
 		/** make do file. */
@@ -104,7 +106,7 @@ namespace cex
 		static void ShowErrorInfo(int nType=0);
 	};
 
-	class CEX_IMPORT LuaState
+	class CEX_API LuaState
 	{
 	public:
 
@@ -117,7 +119,7 @@ namespace cex
 		lua_State* get();
 
 		///	获取包含在reg库中所有变量名称
-		static std::vector<std::string> GetFunctionName( const luaL_reg* reg );
+		static std::vector<std::string> GetFunctionName( const luaL_Reg* reg );
 
 	protected:
 
@@ -133,33 +135,27 @@ namespace cex
 
 	typedef cex::CDelegate( void(lua_State*) )  LuaRegistLibFunc;
 
-	class CEX_IMPORT CLuaCLibRegister
+	class ILuaCLibRegister : public Interface
 	{
 	public:
 		typedef std::map<std::string, LuaRegistLibFunc> FUNC_MAP;
 
-		static CLuaCLibRegister* Instance();
+		virtual void AddRegist( const std::string& lib, const LuaRegistLibFunc::FuncType& func )=0;
 
-		void AddRegist( const std::string& lib, const LuaRegistLibFunc::FuncType& func );
-
-		void OpenLib( lua_State* L, const std::string& lib );
-
-	private:
-
-		CLuaCLibRegister() {}
-
-		FUNC_MAP _map;
+		virtual void OpenLib( lua_State* L, const std::string& lib )=0;
 	};
 
-	class CEX_IMPORT CLuaRegistLibProxy
+	CEX_API ILuaCLibRegister* __stdcall getOrCreateLuaCLibRegister();
+
+	class CLuaRegistLibProxy
 	{
 	public:
-		CLuaRegistLibProxy(const std::string& spaceName, luaL_reg* reg ) :
+		CLuaRegistLibProxy(const std::string& spaceName, luaL_Reg* reg ) :
 		  _spaceName(spaceName), _reg(reg)
 		  {
 			  assert( reg != NULL );
-			  CLuaCLibRegister::Instance()->AddRegist( 
-				  spaceName,
+			  ILuaCLibRegister* ins = getOrCreateLuaCLibRegister();
+			  ins->AddRegist( spaceName,
 				  boost::bind( &CLuaRegistLibProxy::RegistFunction, this, _1 ) );
 		  }
 
@@ -170,9 +166,11 @@ namespace cex
 
 	protected:
 		std::string _spaceName;
-		luaL_reg* _reg;
+		luaL_Reg* _reg;
 
 	};
 
 	//void testLua();
 }
+
+#endif

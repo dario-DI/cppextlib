@@ -1,10 +1,12 @@
 #include "StdAfx.h"
 
+#include <boost/lexical_cast.hpp>
 #include <cex/LuaEx.h>
 #include <algorithm>
 
 #include <cex/ConfigVar.h>
 #include <tchar.h>
+#include <sstream>
 
 /////////////////////////////////////
 
@@ -49,15 +51,15 @@ namespace cex
 		return 0;
 	}
 
-	LUA_BEGIN_REGIST_LIB( ConfigVarLib )
-		LUA_REGIST_FUNC( LuaC_RegistGloable )
-	LUA_END_REGIST_OPEN_LIB( "ConfigVarLib", ConfigVarLib )
+	//LUA_BEGIN_REGIST_LIB( ConfigVarLib )
+	//	LUA_REGIST_FUNC( LuaC_RegistGloable )
+	//LUA_END_REGIST_OPEN_LIB( "ConfigVarLib", ConfigVarLib )
 
 }
 
 ////////////////////////////////////////////////////////////////////////
 //	class ConfigVarRWByLua
-std::string GetWorkPath(HMODULE hModule)
+static std::string GetWorkPath(HMODULE hModule)
 {
 	CHAR fileName[MAX_PATH+1];
 
@@ -81,7 +83,7 @@ std::string GetWorkPath(HMODULE hModule)
 	return strPath;
 }
 
-std::string GetFilePath( const std::string& fileName )
+static std::string GetFilePath( const std::string& fileName )
 {
 	// fileName不包含文件名后缀，即是路径
 	int nDot = fileName.find('.');
@@ -127,6 +129,22 @@ public:
 	ConfigVarRWByLua();
 	virtual ~ConfigVarRWByLua();
 
+public:
+
+	void RegisterLoadValueFunc(const LoadValueFunc& func)
+	{
+		_LoadValueFuncList.push_back( func );
+	}
+
+	const LoadValueFuncList& GetLoadValueFuncList() const 
+	{ 
+		return _LoadValueFuncList;
+	}
+
+	// 注意: 使用前，应使用TryLoadVarFromFile，从文件中获取改变后的变量
+	VarInfoList& GetDomianVars(const DomainType& domain) { return _domainMap[domain]; }
+public:
+
 	// 注册变量信息
 	virtual void RegistDomain( const DomainType& domain, const DomainType& name, const DomainType& value, const DomainType& comment);
 
@@ -144,6 +162,14 @@ public:
 	virtual void LoadVarFromFile(const DomainType& domain);
 
 	virtual bool IsConfigureFileExist(const DomainType& domain);
+
+protected:
+
+	LoadValueFuncList _LoadValueFuncList;
+
+	Var_Domain_Map _domainMap;
+
+	bool _bAlreadyLoadFile;
 };
 
 ConfigVarRWByLua::ConfigVarRWByLua()
@@ -357,25 +383,25 @@ void ConfigVarRWByLua::LoadVarFromFile(const DomainType& domain)
 		return;
 	}
 
-	char* s_luaReadGloable = "for i, v in pairs(LUA_TABLE) do \n" 
+	const char* s_luaReadGloable = "for i, v in pairs(LUA_TABLE) do \n" 
 							"    ConfigVarLib.LuaC_RegistGloable( \"NAME_SPACE\", i, v ) \n"
 							 "end \n";
 
 	std::string luaTableName = detail::RemoveVersionString( domain );
 	std::string nameSpace = luaTableName + "::";
 
-	CStringA strTable( luaTableName.c_str() );
-	CStringA strNameSpace( nameSpace.c_str() );
-	CStringA strCode(s_luaReadGloable);
+	std::string strTable( luaTableName.c_str() );
+	std::string strNameSpace( nameSpace.c_str() );
+	std::string strCode(s_luaReadGloable);
 
-	strCode.Replace( "LUA_TABLE", strTable.GetBuffer(0) );
-	strTable.ReleaseBuffer();
+	std::ostringstream oss;
+	oss << "for i, v in pairs(";
+	oss << strTable.c_str() << ") do \n";
+	oss << "    ConfigVarLib.LuaC_RegistGloable( \"";
+	oss << strNameSpace.c_str() << "\", i, v ) \n";
+	oss << "end \n";
 
-	strCode.Replace( "NAME_SPACE", strNameSpace.GetBuffer(0) );
-	strNameSpace.ReleaseBuffer();
-
-	std::string code( strCode.GetBuffer(0) );
-	strCode.ReleaseBuffer();
+	std::string code = oss.str();
 
 	if ( cex::LuaEx::DoString( L, code.c_str() ) != 0 )
 	{
@@ -415,27 +441,7 @@ bool ConfigVarBooleanType::LoadValueFunc(lua_State* L)
 // class ConfigVarFloatType
 std::string ConfigVarFloatType::Value2String(const ValueType& value)
 {
-	CStringA cNum;
-
-#ifndef _use_integer
-	int integer = (int)value;
-	float fract = value - integer;
-	if ( fract == 0.0 )
-	{
-		cNum.Format( "%.0f", value );
-	}
-	else
-	{
-		cNum.Format( "%.3f", value );
-	}
-#else
-	cNum.Format( "%.3f", value );
-#endif
-
-	std::string strNum( cNum.GetBuffer(0) );
-	cNum.ReleaseBuffer();
-
-	return strNum;
+	return boost::lexical_cast<std::string>(value);
 }
 
 bool ConfigVarFloatType::LoadValueFunc(lua_State* L)
@@ -490,7 +496,7 @@ bool ConfigVarStringType::LoadValueFunc(lua_State* L)
 ///////////////////////////////////
 //	ConfigVarInstanceFactory
 
-void VarRegisterUtil::SetVarValueAndSave(const std::string& varName, const std::string& value)
+static void SetVarValue2RW(const std::string& varName, const std::string& value)
 {
 	bool bRet = CONFIGVARRW_REGISTER_INS->UpdateVarInfo(varName, value);
 	if ( bRet == false )
@@ -509,30 +515,116 @@ void VarRegisterUtil::SetVarValueAndSave(const std::string& varName, const std::
 
 void VarRegisterUtil::SetVar( const std::string& varName, bool v )
 {
-	SetVarValueAndSave(varName, cex::ConfigVarBooleanType::Value2String(v));
+	BOOL_VAR_REGISTER_INS->SetVarPure(varName, v);
+	SetVarValue2RW(varName, cex::ConfigVarBooleanType::Value2String(v));
 }
 
 void VarRegisterUtil::SetVar( const std::string& varName, float v )
 {
-	SetVarValueAndSave(varName, cex::ConfigVarFloatType::Value2String(v));
+	FLOAT_VAR_REGISTER_INS->SetVarPure(varName, v);
+	SetVarValue2RW(varName, cex::ConfigVarFloatType::Value2String(v));
 }
 
 void VarRegisterUtil::SetVar( const std::string& varName, int v )
 {
-	SetVarValueAndSave(varName, cex::ConfigVarFloatType::Value2String(v));
+	FLOAT_VAR_REGISTER_INS->SetVarPure(varName, v);
+	SetVarValue2RW(varName, cex::ConfigVarFloatType::Value2String((float)v));
 }
 
 void VarRegisterUtil::SetVar( const std::string& varName, double v )
 {
-	SetVarValueAndSave(varName, cex::ConfigVarFloatType::Value2String(v));
+	FLOAT_VAR_REGISTER_INS->SetVarPure(varName, v);
+	SetVarValue2RW(varName, cex::ConfigVarFloatType::Value2String((float)v));
+}
+
+void VarRegisterUtil::SetVar( const std::string& varName, const char* v )
+{
+	STRING_VAR_REGISTER_INS->SetVarPure(varName, std::string(v));
+	SetVarValue2RW(varName, cex::ConfigVarStringType::Value2String(v));
 }
 
 void VarRegisterUtil::SetVar( const std::string& varName, const std::string& v )
 {
-	SetVarValueAndSave(varName, cex::ConfigVarStringType::Value2String(v));
+	STRING_VAR_REGISTER_INS->SetVarPure(varName, v);
+	SetVarValue2RW(varName, cex::ConfigVarStringType::Value2String(v));
 }
 
+#pragma region configVar
+
+////////////////////////////////////////////
+//	class ConfigVar
+template<typename DataType>
+class ConfigVar : public IConfigVar<DataType>
+{
+public:
+	ConfigVar()
+	{
+		_rw = CONFIGVARRW_REGISTER_INS;
+		_rw->RegisterLoadValueFunc(boost::bind( &DataType::LoadValueFunc, _1 ));
+	}
+
+public:
+	void RegistVar( 
+		const ConfigDomainType& domain, const NameType& name, 
+		const ValueType& value, const ConfigCommentType& comment )
+	{
+#ifdef _DEBUG
+		Var_Map::iterator itrVar = _varMap.find( name );
+		assert( itrVar == _varMap.end() );	//	a variable with the same name has been already registered.
+#endif
+
+		_varMap[name] = value;
+
+		_rw->RegistDomain( domain, name, DataType::Value2String(value), comment );
+	}
+
+	ValueType GetVar( const NameType& varName )
+	{
+		_rw->TryLoadVarFromFile();
+
+		Var_Map::const_iterator varItr = _varMap.find( varName );
+
+		if ( varItr == _varMap.end() )
+		{
+#ifdef _DEBUG
+			std::cout<< varName.c_str() << ": 未注册的变量." << std::endl;
+			assert(false);
+#endif
+			throw( std::invalid_argument( varName+": can not find." ) );
+		}
+
+		return varItr->second;	
+	}
+
+	void SetVar( const NameType& name, const ValueType& value )
+	{
+		SetVarPure(name, value);
+
+		_rw->UpdateVarInfo( name, DataType::Value2String(value) );
+	}
+
+	void SetVarPure( const NameType& name, const ValueType& value )
+	{
+#ifdef _DEBUG
+		Var_Map::iterator itrVar = _varMap.find( name );
+		assert( itrVar != _varMap.end() );	//	a variable must has been already registered.
+#endif
+		_varMap[name] = value;
+	}
+
+protected:
+
+	Var_Map _varMap;
+	IConfigVarRW* _rw;
+};	
+
+#pragma endregion
+
+typedef ConfigVar<ConfigVarBooleanType> RConfigVarBoolean;
+typedef ConfigVar<ConfigVarFloatType> RConfigVarFloat;
+typedef ConfigVar<ConfigVarStringType> RConfigVarString;
+
 REGIST_DELTA_INSTANCE(IConfigVarRW, ConfigVarRWByLua)
-REGIST_DELTA_INSTANCE(ConfigVarBoolean, ConfigVarBoolean)
-REGIST_DELTA_INSTANCE(ConfigVarFloat, ConfigVarFloat)
-REGIST_DELTA_INSTANCE(ConfigVarString, ConfigVarString)
+REGIST_DELTA_INSTANCE(ConfigVarBoolean, RConfigVarBoolean)
+REGIST_DELTA_INSTANCE(ConfigVarFloat, RConfigVarFloat)
+REGIST_DELTA_INSTANCE(ConfigVarString, RConfigVarString)
