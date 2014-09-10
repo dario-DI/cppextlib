@@ -2,7 +2,10 @@
 /// \brief brief-description
 ///
 /// string interface. Can be using in the different  modules.
-///
+/// 
+/// std::shared_ptr<IString> str = DeltaCreateRef<IString>();
+///	const char* data = str->data();
+/// 
 /// \note:
 /// \author: DI
 /// \time: 2012/8/23 17:38
@@ -49,6 +52,7 @@ namespace cex
 		virtual IString* append(IString* str)=0;
 
 		virtual std::shared_ptr<IString> substr(size_t start, size_t counter)=0;
+
 	};
 
 }

@@ -12,6 +12,33 @@
 #pragma region example_usage
 /*example usage
 
+// 0 Object create by Interface
+class IMyInterface : public Interface
+{
+public:
+	virtual void doSomething()=0;
+}
+
+class IMyImplement : public IMyInterface
+{
+public:
+	void doSomething() {}
+private:
+	std::string str;
+}
+
+// regist Interface and the implementation
+REGIST_DELTA_CREATOR(IMyInterface, IMyImplement)
+
+// how to use
+std::shared_ptr<IMyInterface> refPtr = DeltaCreateRef<IMyInterface>();
+refPtr->doSomething();
+
+// or using by other method
+IMyInterface* obj = DeltaCreate<IMyInterface>();
+obj->doSomething();
+DeltaDestory(obj);
+
 // 1 注册一个函数
 {
 void Foo(int k)
@@ -50,26 +77,6 @@ REGIST_DELTA_INSTANCE(IInstance, InstanceImpl)
 
 // 使用单件对象
 Instance instance = cex::DeltaInstance<Instance>();
-
-// 3 注册一个类工厂
-class IMyInterface : public Interface
-{
-}
-
-class IMyImplement : public IMyInterface
-{
-public:
-	int k;
-}
-
-// 注册
-REGIST_DELTA_CREATOR(IMyInterface, IMyImplement)
-
-// 使用
-IMyInterface* obj = DeltaCreate<IMyInterface>();
-DeltaDestory(obj);
-
-std::shared_ptr<IMyInterface> refPtr = DeltaCreateRef<IMyInterface>();
 
 */
 #pragma endregion
