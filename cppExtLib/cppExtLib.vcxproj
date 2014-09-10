@@ -45,10 +45,11 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>D:\loadcode\boost_1_56_0\boost_1_56_0;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;CPPEXTLIB_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -92,6 +93,7 @@
     <ClInclude Include="..\cex\LuaEx.h" />
     <ClInclude Include="..\cex\MessageMapCom.h" />
     <ClInclude Include="..\cex\MetaProgram.hpp" />
+    <ClInclude Include="..\cex\String.h" />
     <ClInclude Include="..\cex\UnTest.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
@@ -110,6 +112,7 @@
     <ClCompile Include="src\DeltaReflection.cpp" />
     <ClCompile Include="src\LuaEx.cpp" />
     <ClCompile Include="src\MessageMapCom.cpp" />
+    <ClCompile Include="src\String.cpp" />
     <ClCompile Include="src\UnTest.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

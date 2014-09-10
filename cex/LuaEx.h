@@ -77,29 +77,29 @@ namespace cex
 	{
 	public:
 		/** make do file. */
-		static int DoFile( lua_State* L, LPCSTR str );
+		static int DoFile( lua_State* L, const char* str );
 
 		/** make do string. */
-		static int DoString( lua_State* L, LPCSTR str );
+		static int DoString( lua_State* L, const char* str );
 
 		/** make getGlobale string in lua globale code. */
-		static LPSTR LoadString( lua_State* L, LPCSTR str ); 
+		static char* LoadString( lua_State* L, const char* str ); 
 
 		/** make getGlobale int in lua globale code. */
-		static int LoadInteger( lua_State* L, LPCSTR str );
+		static int LoadInteger( lua_State* L, const char* str );
 
 		/** make getGlobale number in lua globale code. */
-		static double LoadDouble( lua_State* L, LPCSTR str );
+		static double LoadDouble( lua_State* L, const char* str );
 
 		/** make getGlobale bool in lua globale code. */
-		static bool LoadBoolean( lua_State* L, LPCSTR str );
+		static bool LoadBoolean( lua_State* L, const char* str );
 
 		/**	make lua_gettable of the table at -1. */
-		static void GetField( lua_State* L, LPCSTR key, void* ret, int type_flag );
+		static void GetField( lua_State* L, const char* key, void* ret, int type_flag );
 
 
 		/** 设置全局环境. */
-		static void Setfenv( lua_State* L, LPCSTR newGlobal );
+		static void Setfenv( lua_State* L, const char* newGlobal );
 
 
 		///	显示错误信息, nType:显示方式. 

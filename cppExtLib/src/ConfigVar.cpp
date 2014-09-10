@@ -1,4 +1,4 @@
-#include "StdAfx.h"
+#include <windows.h>
 
 #include <boost/lexical_cast.hpp>
 #include <algorithm>
@@ -429,8 +429,8 @@ bool ConfigVarBooleanType::LoadValueFunc(lua_State* L)
 	//luaL_checktype(L, -2, LUA_TSTRING );
 	//luaL_checktype(L, -3, LUA_TSTRING );
 
-	LPSTR name_space = (LPSTR)lua_tostring(L, -3);
-	LPSTR name = (LPSTR)lua_tostring(L, -2);
+	char* name_space = (char*)lua_tostring(L, -3);
+	char* name = (char*)lua_tostring(L, -2);
 	bool number = lua_toboolean(L,-1)>0;
 
 	BOOL_VAR_REGISTER_INS->SetVar( std::string(name_space)+name, number );
@@ -455,8 +455,8 @@ bool ConfigVarFloatType::LoadValueFunc(lua_State* L)
 	//luaL_checktype(L, -2, LUA_TSTRING );
 	//luaL_checktype(L, -3, LUA_TSTRING );
 
-	LPSTR name_space = (LPSTR)lua_tostring(L, -3);
-	LPSTR name = (LPSTR)lua_tostring(L, -2);
+	char* name_space = (char*)lua_tostring(L, -3);
+	char* name = (char*)lua_tostring(L, -2);
 	float number = (float)lua_tonumber(L, -1);
 
 	FLOAT_VAR_REGISTER_INS->SetVar( std::string(name_space)+name, number );
@@ -485,9 +485,9 @@ bool ConfigVarStringType::LoadValueFunc(lua_State* L)
 	//luaL_checktype(L, -2, LUA_TSTRING );
 	//luaL_checktype(L, -3, LUA_TSTRING );
 
-	LPSTR name_space = (LPSTR)lua_tostring(L, -3);
-	LPSTR name = (LPSTR)lua_tostring(L, -2);
-	LPSTR number = (LPSTR)lua_tostring(L, -1);
+	char* name_space = (char*)lua_tostring(L, -3);
+	char* name = (char*)lua_tostring(L, -2);
+	char* number = (char*)lua_tostring(L, -1);
 
 	STRING_VAR_REGISTER_INS->SetVar( std::string(name_space)+name, number );
 

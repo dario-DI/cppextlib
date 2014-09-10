@@ -1,4 +1,3 @@
-#include "stdAfx.h"
 #include <boost/container/detail/Singleton.hpp>
 #include <cex/DeltaReflection.h>
 

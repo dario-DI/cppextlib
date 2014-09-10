@@ -51,6 +51,9 @@
     <ClInclude Include="..\cex\ConfigVar.h">
       <Filter>cex</Filter>
     </ClInclude>
+    <ClInclude Include="..\cex\String.h">
+      <Filter>cex</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -75,6 +78,9 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\ConfigVar.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\String.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>

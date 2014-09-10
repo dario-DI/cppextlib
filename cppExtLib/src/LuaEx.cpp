@@ -1,9 +1,9 @@
-#include "stdafx.h"
+#include <windows.h>
+#include <shellapi.h>
+
 #include <stdio.h>
 #include <sstream>
-#include <shellapi.h>
 #include <cex/LuaEx.h>
-
 
 //load lua libary
 #pragma comment(lib, _3RDPARTY_PATH_  _LUA_LIB_ ".lib") 
@@ -20,7 +20,7 @@ namespace cex
 	class GetGlobaleAndPop
 	{
 	public:
-		GetGlobaleAndPop( lua_State* L, LPCSTR str ) : _L(L)
+		GetGlobaleAndPop( lua_State* L, const char* str ) : _L(L)
 		{
 			lua_getglobal(_L, str);	//	返回值放在栈顶
 		}
@@ -213,7 +213,7 @@ namespace cex
 	}
 }
 ////////////////////////////////////////////////////////
-int LuaEx::DoFile( lua_State* L, LPCSTR str )
+int LuaEx::DoFile( lua_State* L, const char* str )
 {
 	int nResult = luaL_dofile(L, str);
 
@@ -225,7 +225,7 @@ int LuaEx::DoFile( lua_State* L, LPCSTR str )
 	return nResult;
 }
 
-int LuaEx::DoString( lua_State* L,  LPCSTR str )
+int LuaEx::DoString( lua_State* L,  const char* str )
 {
 	int nResult = luaL_dostring(L, str);
 
@@ -237,18 +237,18 @@ int LuaEx::DoString( lua_State* L,  LPCSTR str )
 	return nResult;
 }
 
-LPSTR LuaEx::LoadString( lua_State* L,  LPCSTR str )
+char* LuaEx::LoadString( lua_State* L,  const char* str )
 {
 	GetGlobaleAndPop makeGet(L, str);
 
 	if (lua_isstring(L, -1))
 	{
-		return (LPSTR)lua_tostring(L, -1);
+		return (char*)lua_tostring(L, -1);
 	}
 	return NULL;
 }
 
-int LuaEx::LoadInteger( lua_State* L,  LPCSTR str )
+int LuaEx::LoadInteger( lua_State* L,  const char* str )
 {
 	GetGlobaleAndPop makeGet(L, str);
 
@@ -259,7 +259,7 @@ int LuaEx::LoadInteger( lua_State* L,  LPCSTR str )
 	return NULL;
 }
 
-double LuaEx::LoadDouble( lua_State* L,  LPCSTR str )
+double LuaEx::LoadDouble( lua_State* L,  const char* str )
 {
 	GetGlobaleAndPop makeGet(L, str);
 
@@ -271,7 +271,7 @@ double LuaEx::LoadDouble( lua_State* L,  LPCSTR str )
 
 }
 
-bool LuaEx::LoadBoolean( lua_State* L,  LPCSTR str )
+bool LuaEx::LoadBoolean( lua_State* L,  const char* str )
 {
 	GetGlobaleAndPop makeGet(L, str);
 
@@ -284,7 +284,7 @@ bool LuaEx::LoadBoolean( lua_State* L,  LPCSTR str )
 	return false;
 }
 
-void LuaEx::GetField( lua_State* L,  LPCSTR key, void* ret, int type_flag )
+void LuaEx::GetField( lua_State* L,  const char* key, void* ret, int type_flag )
 {
 	//	此函数在lua中调用C函数中被间接调用，因此参数已经从左到右依次入栈
 
@@ -339,7 +339,7 @@ void LuaEx::GetField( lua_State* L,  LPCSTR key, void* ret, int type_flag )
 	lua_pop( L, 1 );	//	将返回值出栈, 恢复栈顶元素
 }
 
-void LuaEx::Setfenv( lua_State* L, LPCSTR newGlobal )
+void LuaEx::Setfenv( lua_State* L, const char* newGlobal )
 {
 	//lua_getglobal( L, "_G" );
 

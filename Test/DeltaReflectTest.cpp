@@ -1,7 +1,9 @@
 #include "stdafx.h"
 
+#include <iostream>
 #include <cex/DeltaReflection.h>
 #include <cex/UnTest.h>
+
 
 using namespace cex;
 

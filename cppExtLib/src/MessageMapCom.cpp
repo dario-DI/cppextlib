@@ -1,7 +1,6 @@
-#include "stdAfx.h"
 #include <cex\MessageMapCom.h>
 
-void APIENTRY ShutMessageMapCom()
+void __stdcall ShutMessageMapCom()
 {
 	COM_MSG_INSTANCE_PTR->ClearMessageMap();
 }
