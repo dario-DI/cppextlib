@@ -1,5 +1,6 @@
 #include "stdAfx.h"
 #include <cex/UnTest.h>
+#include <iostream>
 
 namespace cex
 {

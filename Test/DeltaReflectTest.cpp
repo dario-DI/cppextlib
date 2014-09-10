@@ -157,13 +157,11 @@ CEX_TEST(DeltaReflectTest)
 		DeltaDestory(test01);
 
 		// test ref create
-		boost::shared_ptr<Test0> test00;
-		DeltaCreateRef(test00);
+		std::shared_ptr<Test0> test00 = DeltaCreateRef<Test0>();
 		test1 = dynamic_cast<Test1*>(test00.get());
 		assert(test1!=nullptr);
 
-		boost::shared_ptr<Test0> test001;
-		DeltaCreateRef(test001);
+		std::shared_ptr<Test0> test001 = DeltaCreateRef<Test0>();
 		test1 = dynamic_cast<Test1*>(test001.get());
 		assert(test1!=nullptr);
 
@@ -173,8 +171,5 @@ CEX_TEST(DeltaReflectTest)
 		assert(test2!=nullptr);
 		test2->v = 2;
 	}
-	
-	
-
 	
 }

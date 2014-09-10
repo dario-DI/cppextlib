@@ -74,6 +74,6 @@ CEX_TEST(MessageMapTest)
 
 	std::string str="ww";
 	int kk = 0;
-	kk = ::SendMessageComAnyR<int>(&sender, 2, boost::ref(str), boost::cref(ComMsg()) );
+	kk = ::SendMessageComAnyR<int>(&sender, 2, boost::ref(str), boost::cref(msg) );
 	assert(kk==100&&str=="changed");
 }

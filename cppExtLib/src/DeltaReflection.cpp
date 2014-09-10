@@ -1,20 +1,20 @@
 #include "stdAfx.h"
-#include <loki/Singleton.h>
+#include <boost/container/detail/Singleton.hpp>
 #include <cex/DeltaReflection.h>
 
 namespace cex
 {
-	typedef Loki::SingletonHolder<StringDeltaRegister> StringDeltaRegisterSingletonHolder;
-	typedef Loki::SingletonHolder<UIntDeltaRegister> UIntDeltaRegisterSingletonHolder;
+	typedef boost::container::container_detail::singleton_default<StringDeltaRegister> StringDeltaRegisterSingletonHolder;
+	typedef boost::container::container_detail::singleton_default<UIntDeltaRegister> UIntDeltaRegisterSingletonHolder;
 
-	StringDeltaRegister& APIENTRY StringDeltaRegisterSingleton()
+	StringDeltaRegister& __stdcall StringDeltaRegisterSingleton()
 	{
-		return StringDeltaRegisterSingletonHolder::Instance();
+		return StringDeltaRegisterSingletonHolder::instance();
 	}
 
-	UIntDeltaRegister& APIENTRY UIntDeltaRegisterSingleton()
+	UIntDeltaRegister& __stdcall UIntDeltaRegisterSingleton()
 	{
-		return UIntDeltaRegisterSingletonHolder::Instance();
+		return UIntDeltaRegisterSingletonHolder::instance();
 	}
 }
 
