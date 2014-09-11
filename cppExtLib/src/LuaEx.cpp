@@ -451,16 +451,6 @@ namespace cex
 {
 	ILuaCLibRegister* __stdcall getOrCreateLuaCLibRegister()
 	{
-		try
-		{
-			cex::DeltaCast<ILuaCLibRegister*>(DELTA_REGKEY_SYS_INSTANCE,
-				typeid(ILuaCLibRegister*).name());
-		}
-		catch(std::exception e)
-		{
-			cex::DeltaObjInstanceRegistProxy<ILuaCLibRegister, CLuaCLibRegister> temp;
-		}
-
-		return cex::DeltaInstance<ILuaCLibRegister>();
+		return DeltaGetOrCreateInstance<ILuaCLibRegister, CLuaCLibRegister>();
 	}
 }

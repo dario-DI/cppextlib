@@ -76,7 +76,7 @@ void foo() {}
 REGIST_DELTA_INSTANCE(IInstance, InstanceImpl)
 
 // 使用单件对象
-Instance instance = cex::DeltaInstance<Instance>();
+IInstance instance = cex::DeltaInstance<IInstance>();
 
 */
 #pragma endregion
@@ -98,11 +98,14 @@ Instance instance = cex::DeltaInstance<Instance>();
 // 所有的注册key声明宏，约定以DELTA_REGKEY_开头，便于统一搜索查看
 // 并且约定，手动添加字符串key，均已大写表示。
 
-// 对象生命周期管理者主键
-#define DELTA_REGKEY_SYS_REGREFPTR "SYS0"
-
 // 单件对象注册主键
-#define DELTA_REGKEY_SYS_INSTANCE "SYS1"
+#define DELTA_REGKEY_SYS_INSTANCE "SYS0"
+
+// 对象生命周期管理者主键
+#define DELTA_REGKEY_SYS_REGREFPTR "SYS1"
+
+// 对象创建者注册主键
+#define DELTA_REGKEY_SYS_TYPE_CREATOR "SYS2"
 
 namespace cex
 {
@@ -457,6 +460,9 @@ namespace cex
 	class InterfaceCreator
 	{
 	public:
+		virtual const char* IType_type_name()=0;
+		virtual const char* RType_type_name()=0;
+
 		virtual Interface* create()=0;
 		virtual void destory(Interface*)=0;
 
@@ -466,12 +472,16 @@ namespace cex
 	template<typename T>
 	class TInterfaceCreator : public InterfaceCreator
 	{
+	public:
+		virtual const char* IType_type_name()		{ return typeid(T).name(); }
 	};
 
 	template<typename T, typename Base>
 	class TRInterfaceCreator : public TInterfaceCreator<Base>
 	{
 	public:
+		virtual const char* RType_type_name()	{ return typeid(T).name(); }
+
 		virtual Interface* create()
 		{
 			return DeltaRefPtrContainer::addObject(std::make_shared<T>());
@@ -487,15 +497,13 @@ namespace cex
 			return std::make_shared<T>();
 		}
 	};
-
 	
 
 	// 对象生命周期管理者容器
 	class DeltaRefPtrContainer
 	{
 	public:
-		typedef std::shared_ptr<Interface> PtrType;
-		typedef std::vector<PtrType> DeltaSysRefPtrContainer;
+		typedef std::vector<std::shared_ptr<Interface> > DeltaSysRefPtrContainer;
 
 		static bool IsExisted(Interface* obj)
 		{
@@ -511,7 +519,7 @@ namespace cex
 			return false;
 		}
 
-		static Interface* addObject(PtrType obj)
+		static Interface* addObject(std::shared_ptr<Interface> obj)
 		{
 			getOrCreateContainer().push_back(obj);
 			return obj.get();
@@ -523,7 +531,7 @@ namespace cex
 
 			container.erase(
 				std::remove_if(container.begin(), container.end(), 
-				[&obj](const PtrType& v)
+				[&obj](const std::shared_ptr<Interface>& v)
 			{
 				if (v.get()==obj) return true;
 				else return false;
@@ -551,26 +559,34 @@ namespace cex
 		}
 	};
 
-	// 对象创建工厂注册代理
+	//---------------------------------------------------------------------------------------
+
+	// 对象创建者注册代理
 	template<typename IType, typename RType=IType>
 	class InterfaceCreatorRegistProxy
 	{
 	public:
-		typedef TInterfaceCreator<IType> ITypeCreator;
-		typedef TRInterfaceCreator<RType, IType> RTypeCreator;
+		typedef TRInterfaceCreator<RType, IType>	RTypeCreator;
 
 		InterfaceCreatorRegistProxy()
 		{
-			DeltaObjInstanceRegistProxy<ITypeCreator, RTypeCreator> temp;
+			reg::Register(DELTA_REGKEY_SYS_TYPE_CREATOR, 
+				typeid(IType).name(), 
+				std::shared_ptr<InterfaceCreator>(std::make_shared<RTypeCreator>()));
 		}
 	};
+
+	template<typename IType>
+	InterfaceCreator* DeltaGetCreator()
+	{
+		return DeltaCast<std::shared_ptr<InterfaceCreator> >(
+			DELTA_REGKEY_SYS_TYPE_CREATOR, typeid(IType).name()).get(); 
+	}
 
 	template<typename T>
 	T* DeltaCreate()
 	{
-		typedef TInterfaceCreator<T> ITypeCreator;
-
-		ITypeCreator* pCreator = DeltaInstance<ITypeCreator>();
+		InterfaceCreator* pCreator = DeltaGetCreator<T>();
 
 		return dynamic_cast<T*>(pCreator->create());
 	}
@@ -578,9 +594,7 @@ namespace cex
 	template<typename T>
 	void DeltaDestory(T* v)
 	{
-		typedef TInterfaceCreator<T> ITypeCreator;
-
-		ITypeCreator* pCreator = DeltaInstance<ITypeCreator>();
+		InterfaceCreator* pCreator = DeltaGetCreator<T>();
 
 		pCreator->destory(v);
 	}
@@ -588,12 +602,25 @@ namespace cex
 	template<typename T>
 	std::shared_ptr<T> DeltaCreateRef()
 	{
-		typedef TInterfaceCreator<T> ITypeCreator;
-
-		ITypeCreator* pCreator = DeltaInstance<ITypeCreator>();
+		InterfaceCreator* pCreator = DeltaGetCreator<T>();
 
 		return std::dynamic_pointer_cast<T>(pCreator->createPure());
 	}
+
+	inline std::shared_ptr<Interface> DeltaCreateRef(const char* IType_type_name)
+	{
+		InterfaceCreator* pCreator = DeltaCast<std::shared_ptr<InterfaceCreator> >(
+			DELTA_REGKEY_SYS_TYPE_CREATOR, IType_type_name).get(); 
+
+		return std::dynamic_pointer_cast<Interface>(pCreator->createPure());
+	}
+
+	template<typename R1, typename R2>
+	R1* DeltaQueryInterface(R2* ptr)
+	{
+		return dynamic_cast<R1*>(ptr);
+	}
+	//-----------------------------------------------------------------------------------------
 
 	// 对象单件注册代理(初始化次序的不确定, 静态变量内部不能引用其它静态变量)
 	template<typename IType, typename RType>
@@ -610,15 +637,21 @@ namespace cex
 	template<typename IType>
 	IType* DeltaInstance()
 	{
+		return DeltaCast<std::shared_ptr<IType> >(DELTA_REGKEY_SYS_INSTANCE, typeid(IType).name()).get(); 
+	}
+
+	template<typename IType, typename RType>
+	IType* DeltaGetOrCreateInstance()
+	{
 		try
 		{
-			return DeltaCast<std::shared_ptr<IType> >(DELTA_REGKEY_SYS_INSTANCE, typeid(IType).name()).get();
+			return cex::DeltaCast<std::shared_ptr<IType> >(DELTA_REGKEY_SYS_INSTANCE, typeid(IType).name()).get();
 		}
-		catch (std::exception e)
+		catch(std::exception e)
 		{
-			assert(false); // no given type creator has been registed, or type error;
-			return nullptr;
-		}		 
+			cex::DeltaObjInstanceRegistProxy<IType, RType> temp;
+			return cex::DeltaCast<std::shared_ptr<IType> >(DELTA_REGKEY_SYS_INSTANCE, typeid(IType).name()).get();
+		}
 	}
 
 #pragma endregion 
