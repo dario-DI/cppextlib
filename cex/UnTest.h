@@ -54,6 +54,8 @@ namespace cex
 	static cex::UnitTestCaseRegProxy ctsProxy_##caseName(#caseName, &ctx##caseName);\
 	void ctx##caseName()
 
+#define CEX_TEST_OFF(caseName) static void MT_SEQUENCE_NAME()
+
 #define CEX_ASSERT_TRUE(condition) assert(condition==true)
 
 #define CEX_ASSERT_FALSE(condition) assert(condition==false)

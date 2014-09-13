@@ -620,6 +620,12 @@ namespace cex
 	{
 		return dynamic_cast<R1*>(ptr);
 	}
+
+	template<typename R1, typename R2>
+	R1* DeltaQueryInterface(const std::shared_ptr<R2>& ptr)
+	{
+		return dynamic_cast<R1*>(ptr.get());
+	}
 	//-----------------------------------------------------------------------------------------
 
 	// 对象单件注册代理(初始化次序的不确定, 静态变量内部不能引用其它静态变量)
