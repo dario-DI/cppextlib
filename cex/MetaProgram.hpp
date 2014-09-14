@@ -1,5 +1,5 @@
 /// \file Meta.hpp Copyright (C) Sharewin Inc.
-/// \brief 元编程基本元素( 宏递归，泛型递归 )
+/// \brief meta program( macro recursively, generic recursively )
 ///
 ///
 /// \note:

@@ -1,6 +1,7 @@
 /// \file deltaReflection.h Copyright (C)
 /// \brief 
-///  any type reflection by string key, or even by unsigned int key(string hash code).
+///  providing any type reflection by string key, or even by unsigned int key(string hash code).
+///  providing easily interface creating like COM that using in different modules.
 ///  providing singleton pattern implement by interface mapping the implement.
 ///
 /// \note:
@@ -39,18 +40,18 @@ IMyInterface* obj = DeltaCreate<IMyInterface>();
 obj->doSomething();
 DeltaDestory(obj);
 
-// 1 注册一个函数
+// 1 reflect a function
 {
 void Foo(int k)
 {
 // do something
 }
 
-// 在cpp文件中注册Foo
+// regist it in .cpp
 REGIST_DELTA( "MyLib", "Foo", &Foo);
 }
 
-// 使用函数
+// using that function
 {
 typedef void (*MethodType)(int);
 
@@ -59,7 +60,7 @@ MethodType func = DeltaCast<MethodType>("MyLib", "Foo");
 func(2);
 }
 
-// 2 注册一个类，并使用此类的单件
+// 2 register a singleton class
 class IInstance : public Interface
 {
 public:
@@ -72,10 +73,10 @@ public:
 void foo() {}
 }
 
-// 注册
+// register
 REGIST_DELTA_INSTANCE(IInstance, InstanceImpl)
 
-// 使用单件对象
+// using the Instance safely
 IInstance instance = cex::DeltaInstance<IInstance>();
 
 */

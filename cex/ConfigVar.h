@@ -1,6 +1,7 @@
 /// \file ConfigVar.h Copyright (C).
 /// \brief configurable variable by configure file. 
 ///
+/// It can be instead of .ini files for reading and writing
 ///
 /// \note:
 /// \author: DI
@@ -11,7 +12,7 @@
 #pragma region example_usage
 /*
 
-/// 获取变量
+/// get variable
 if ( GET_bool(sw::shader_use) )
 {
 	// do something
@@ -22,20 +23,19 @@ if ( GET_int( great::overview_width ) > 256 ) {}
 float fLight1_diffuse = GET_float( light1_diffuse );
 std::string str = GET_string( d3::label2 );
 
-/// 界面化修改seismic命名空间下的所有变量
+/// modify all variable in namespace of seismic by UI
 cex::ShowDlg::ShowDlgVarEdit( "abc" );
 
-/// 设置某一变量的值，并保存到文件
+/// set variable, and writing it into configure file
 SET_var( great::overview_width,  150 );
 
 ///-------------------------------------------------------
 
-/// 注册变量方法
-/// 在源文件中，添加命名空间与变量. 使用时 不 需要对文件名引用
+/// regist variable in .cpp file
 BEGIN_REGIST_VAR_TABLE_V( d3, 1 )
-	REGIST_bool(abc, true,			"abc")
-	REGIST_int(abc2, 256,			"abc2")
-	REGIST_string(abc3,  "abc3",			"abc3")
+	REGIST_bool(abc, true,			"comment abc")
+	REGIST_int(abc2, 256,			"comment abc2")
+	REGIST_string(abc3,  "abc3",	"comment abc3")
 END_REGIST_VAR_TABLE
 
 */

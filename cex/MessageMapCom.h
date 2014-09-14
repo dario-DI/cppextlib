@@ -13,17 +13,17 @@ namespace example_usage
 {
 	void TestClass::Test()
 	{
-		/// SendMessageCom发送 ComMsg 类型的消息函数, param 1: 消息发送者指针, param 2: ComMsg类型消息
+		/// SendMessageCom: Sending message of ComMsg, param 1: pointer of sender, param 2: the message
 		::SendMessageCom( this, ComMsg(MSG_DATA, "load", NULL) );
 
-		/// SendMessageComAny发送 任意参数类型的 消息，参数个数为1~8个，第一个参数必须为发送者指针。
+		/// SendMessageComAny: sending ANY type message with mutable arguments that can be 1~8，first param must be pointer of sender.
 		::SendMessageComAny( this, 2.0f，CPoint(125,231) );
 
-		/// 注意: 参数为引用(&)使用boost::ref(), 常引用(const&)使用boost::cref()
+		/// NOTICE: when arguments is (&), using boost::ref(), and (const&) using boost::cref()
 		float fRefValue=2.0; 
 		::SendMessageComAny( this, boost::ref(fRefValue), boost::cref( CPoint(125,231) ) );
 
-		/// SendMessageComAnyR发送 包含返回值的 任意参数类型的 消息，当消息响应函数返回值为默认值时，消息继续遍历循环；否则，停止循环并返回。
+		/// SendMessageComAnyR: sending message with the result of return. when return the default, the message will be continue the cycle, or stop and return.
 		BOOL bRet = ::SendMessageComAnyR<BOOL>( this, MSG_ADD );
 		CPoint pt = ::SendMessageComAnyR<CPoint>( this, boost::ref(fRefValue), boost::cref( CPoint(125,231) ) );
 	}
@@ -31,32 +31,32 @@ namespace example_usage
 
 namespace exampleCode_recieve_message
 {
-	/// 接收消息使用方法
-	/// 类头文件
+	/// receive message
+	/// head file
 	class MyClass
 	{
 	public:
-		DECL_COM_MESSAGE_MAP( MyClass )	//	声明消息映射列表
+		DECL_COM_MESSAGE_MAP( MyClass )	//	declare receive message map 
 			//...
 	private:
 
-		// 声明消息的自定义相应函数
-		void OnSeismicDataLineMsg( CSeismicDataLine* data, const ComMsg& msg );//接收CSeismicDataLine的ComMsg类型消息
-		void OnSingleWellDataMsg( CSingleWellData* data, int& refValue ); //接收CSingleWellData的int &类型消息
-		BOOL OnFaultMsg( CSeismicFault* data, const CPoint& point );//接收CSeismicFault的CPoint const& 类型含返回值消息
+		// declare the receive functions
+		void OnSeismicDataLineMsg( CSeismicDataLine* data, const ComMsg& msg );//receive ComMsg of CSeismicDataLine
+		void OnSingleWellDataMsg( CSingleWellData* data, int& refValue ); //receive int& of CSingleWellData
+		BOOL OnFaultMsg( CSeismicFault* data, const CPoint& point );//receive CPoint const& of CSeismicFault
 
 		//...
 	};
 
-	/// 类实现文件(.cpp) 
-	/// 实现消息映射列表
+	/// Implement(.cpp) 
+	/// implement the receive message map
 	BEGIN_COM_MESSAGE_MAP(MyClass)
-		ON_COM_MSG( OnSeismicDataLineMsg, CSeismicDataLine ) //接收CSeismicDataLine的消息
-		ON_COM_MSG( OnSingleWellDataMsg, CSingleWellData)//接收CSingleWellData的消息
-		ON_COM_MSG( OnFaultMsg, CSeismicFault)//接收CSeismicFault的CPoint类型含返回值消息
+		ON_COM_MSG( OnSeismicDataLineMsg, CSeismicDataLine ) //receive from CSeismicDataLine
+		ON_COM_MSG( OnSingleWellDataMsg, CSingleWellData)//receive from CSingleWellData
+		ON_COM_MSG( OnFaultMsg, CSeismicFault)//receive from CSeismicFault
 	END_COM_MESSAGE_MAP
 
-	///	实现自定义消息响应函数
+	///	the function of receive message
 	void MyClass::OnSeismicDataLineMsg( SeismicData::CSeismicDataLine* data, const ComMsg& msg )
 	{
 		//	add code to handle this massage 
@@ -73,7 +73,7 @@ namespace exampleCode_recieve_message
 	BOOL OnFaultMsg( CSeismicFault* data, const CPoint& point )
 	{
 		///...
-		return FALSE; // return false消息继续循环；true, 消息停止循环
+		return FALSE; // return false will continue cycle；true, stop cycle.
 	}
 }
 
