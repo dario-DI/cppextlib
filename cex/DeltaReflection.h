@@ -90,6 +90,7 @@ IInstance instance = cex::DeltaInstance<IInstance>();
 #include <vector>
 #include <memory>
 #include <assert.h>
+#include <iostream>
 #include <boost/any.hpp>
 
 #include <cex/config>
@@ -147,9 +148,8 @@ namespace cex
 				return itr->second;
 			}
 
-			//MessageBox(0, key+_T(" KeyValueRegister ≤È’“∫Ø ˝ ß∞‹"), _T(""), MB_OK );
 			//assert(false);
-			//TRACE( "\nDeltaReflection.h: Get(%s) failed: no such key has registered.\n", key );
+			//std::cout << "DeltaReflection.h: KeyValueRegister: invalid key: " << key << std::endl;
 			throw( std::invalid_argument( "DeltaReflection.h: KeyValueRegister: invalid key." ) );
 		}
 
@@ -162,7 +162,7 @@ namespace cex
 			}
 
 			//assert(false);
-			//TRACE( "\nDeltaReflection.h: Get(%s) failed: no such key has registered.\n", key );
+			//std::cout << "DeltaReflection.h: KeyValueRegister: invalid key: " << key << std::endl;
 			throw( std::invalid_argument( "DeltaReflection.h: KeyValueRegister: invalid key." ) );
 		}
 
@@ -262,19 +262,15 @@ namespace cex
 			KeyValueRegister<KeyType, boost::any, UniqueTypeofDeltaRegister>& reg,
 			const KeyType& key)
 		{
-			boost::any& r = reg.Get(key);
-
 			try
 			{
+				boost::any& r = reg.Get(key);
 				return boost::any_cast<DeltaType>(r);
 			}
-			catch (std::exception e)
+			catch (...)
 			{
-				//TRACE( "\nDeltaReflection.h: DeltaCast(%s) failed: type cast failed.\n", libAndValueName);
-				//assert(false);
-				//throw(e);
+				//std::cout << "DeltaReflection.h: TGetRegValue, invalid key: " << key << std::endl;
 				throw( std::invalid_argument( "invalid key" ) );
-				//return DeltaType();
 			}
 		}
 
@@ -283,16 +279,14 @@ namespace cex
 			KeyValueRegister<KeyType, boost::any, UniqueTypeofDeltaRegister>& reg,
 			const KeyType& key)
 		{
-			boost::any& r = reg.Get(key);
-
-			DeltaType* v = boost::any_cast<DeltaType>(&r);
-
-			if (v != NULL)
+			try
 			{
-				return v;
+				boost::any& r = reg.Get(key);
+				return boost::any_cast<DeltaType>(&r);
 			}
-			else
+			catch(...)
 			{
+				//std::cout << "DeltaReflection.h: TGetRegValue, invalid key: " << key << std::endl;
 				throw( std::invalid_argument( "invalid key" ) );
 			}
 		}
@@ -319,15 +313,25 @@ namespace cex
 	{
 		typedef df::TTypeTraits<valueKeyType>::RegType RegType;
 
-		RegType* valueReg = DeltaPTRCast<RegType>(libKey);
+		try
+		{
+			RegType* valueReg = DeltaPTRCast<RegType>(libKey);
 
-		if (valueReg==NULL)
-		{ 
-			throw( std::invalid_argument( "invalid lib key." ) );
+			if (valueReg!=NULL)
+			{
+				return df::TGetRegValue<DeltaType>(*valueReg, 
+					df::TTypeTraits<valueKeyType>::Convert(valueKey));
+			}
+			else
+			{
+				throw( std::invalid_argument( "invalid lib key." ) );
+			}			
 		}
-
-		return df::TGetRegValue<DeltaType>(*valueReg, 
-			df::TTypeTraits<valueKeyType>::Convert(valueKey));
+		catch(std::exception e)
+		{
+			std::cout << "DeltaReflection.h: DeltaCast, invalid lib key: " << libKey << ", value key: "<< valueKey << std::endl;
+			throw(e);
+		}
 	}
 
 	template<typename DeltaType, typename libKeyType, typename valueKeyType>
@@ -335,15 +339,26 @@ namespace cex
 	{
 		typedef df::TTypeTraits<valueKeyType>::RegType RegType;
 
-		RegType* valueReg = DeltaPTRCast<RegType>(libKey);
+		try
+		{
+			RegType* valueReg = DeltaPTRCast<RegType>(libKey);
 
-		if (valueReg==NULL)
-		{ 
-			throw( std::invalid_argument( "invalid lib key." ) );
+			if (valueReg!=NULL)
+			{
+				return df::TGetRegValuePTR<DeltaType>(*valueReg,
+					df::TTypeTraits<valueKeyType>::Convert(valueKey));
+			}
+			else
+			{
+				throw( std::invalid_argument( "invalid lib key." ) );
+			}			
 		}
-
-		return df::TGetRegValuePTR<DeltaType>(*valueReg,
-			df::TTypeTraits<valueKeyType>::Convert(valueKey));
+		catch(std::exception e)
+		{
+			std::cout << "DeltaReflection.h: DeltaCast, invalid lib key: " << libKey << ", value key: "<< valueKey << std::endl;
+			throw(e);
+		}
+		
 	}
 
 	namespace reg
@@ -656,6 +671,7 @@ namespace cex
 		}
 		catch(std::exception e)
 		{
+			std::cout << "Creating Instance: "<<typeid(IType).name()<<std::endl;
 			cex::DeltaObjInstanceRegistProxy<IType, RType> temp;
 			return cex::DeltaCast<std::shared_ptr<IType> >(DELTA_REGKEY_SYS_INSTANCE, typeid(IType).name()).get();
 		}

@@ -528,13 +528,13 @@ void VarRegisterUtil::SetVar( const std::string& varName, float v )
 
 void VarRegisterUtil::SetVar( const std::string& varName, int v )
 {
-	FLOAT_VAR_REGISTER_INS->SetVarPure(varName, v);
+	FLOAT_VAR_REGISTER_INS->SetVarPure(varName, (float)v);
 	SetVarValue2RW(varName, cex::ConfigVarFloatType::Value2String((float)v));
 }
 
 void VarRegisterUtil::SetVar( const std::string& varName, double v )
 {
-	FLOAT_VAR_REGISTER_INS->SetVarPure(varName, v);
+	FLOAT_VAR_REGISTER_INS->SetVarPure(varName, (float)v);
 	SetVarValue2RW(varName, cex::ConfigVarFloatType::Value2String((float)v));
 }
 
