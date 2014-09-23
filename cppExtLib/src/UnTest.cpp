@@ -84,5 +84,8 @@ namespace cex
 		std::vector<caseMethod> _vtCase;
 	};
 
-	REGIST_DELTA_INSTANCE(IUnitTestMethodRegister, UTRegister);
+	CEX_API IUnitTestMethodRegister& __stdcall getOrCreateUnitTestRegIns()
+	{
+		return *DeltaGetOrCreateInstance<IUnitTestMethodRegister, UTRegister>();
+	}
 }

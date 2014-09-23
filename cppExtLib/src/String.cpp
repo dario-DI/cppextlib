@@ -1,7 +1,6 @@
 #include <assert.h>
 #include <algorithm>
 #include <string>
-#include <boost/iostreams/stream.hpp>
 
 #include <cex/String.h>
 

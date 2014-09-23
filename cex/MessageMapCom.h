@@ -16,7 +16,7 @@ namespace example_usage
 		/// SendMessageCom: Sending message of ComMsg, param 1: pointer of sender, param 2: the message
 		::SendMessageCom( this, ComMsg(MSG_DATA, "load", NULL) );
 
-		/// SendMessageComAny: sending ANY type message with mutable arguments that can be 1~8£¬first param must be pointer of sender.
+		/// SendMessageComAny: sending ANY type message with mutable arguments which can be 1~8£¬first param must be pointer of sender.
 		::SendMessageComAny( this, 2.0f£¬CPoint(125,231) );
 
 		/// NOTICE: when arguments is (&), using boost::ref(), and (const&) using boost::cref()
@@ -94,8 +94,7 @@ namespace exampleCode_recieve_message
 #include <cex/MetaProgram.hpp>
 #include <cex/DeltaReflection.h>
 
-#define COM_MSG_INSTANCE_PTR \
-	cex::DeltaInstance<MessageMapCom::IMessageRegist>()
+#define COM_MSG_INSTANCE_PTR (MessageMapCom::getOrCreateMessageRegIns())
 
 #define ADD_COM_MSG_OBSERVER( key, method, reciever_ptr ) \
 	COM_MSG_INSTANCE_PTR->addObserver(key, method, reciever_ptr );
@@ -480,6 +479,8 @@ namespace MessageMapCom
 
 		client* _client;
 	};
+
+	CEX_API IMessageRegist* __stdcall getOrCreateMessageRegIns();
 
 }
 

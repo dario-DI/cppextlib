@@ -1,7 +1,7 @@
 /// \file deltaReflection.h Copyright (C)
 /// \brief 
 ///  providing any type reflection by string key, or even by unsigned int key(string hash code).
-///  providing easily interface creating like COM that using in different modules.
+///  providing easy using interface creating like COM that can be using in different modules.
 ///  providing singleton pattern implement by interface mapping the implement.
 ///
 /// \note:

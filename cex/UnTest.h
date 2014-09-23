@@ -32,7 +32,10 @@ namespace cex
 		virtual void run(size_t index)=0;
 	};
 
-#define UnitTestRegisterIns (*(cex::DeltaInstance<cex::IUnitTestMethodRegister>()))
+
+	CEX_API IUnitTestMethodRegister& __stdcall getOrCreateUnitTestRegIns();
+
+	#define UnitTestRegisterIns (cex::getOrCreateUnitTestRegIns())
 
 	class UnitTestCaseRegProxy
 	{

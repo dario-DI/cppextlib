@@ -194,8 +194,10 @@ namespace MessageMapCom
 		}
 	};
 
-	//regist singleton instance
-	REGIST_DELTA_INSTANCE(IMessageRegist, MessageRegist);
+	CEX_API IMessageRegist* __stdcall getOrCreateMessageRegIns()
+	{
+		return cex::DeltaGetOrCreateInstance<IMessageRegist, MessageRegist>();
+	}
 
 }
 	
