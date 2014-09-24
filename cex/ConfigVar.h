@@ -1,7 +1,7 @@
 /// \file ConfigVar.h Copyright (C).
 /// \brief configurable variable by configure file. 
 ///
-/// It can be instead of .ini files for reading and writing
+/// insteading of .ini files, it can be using variables of reading and writing
 ///
 /// \note:
 /// \author: DI
@@ -13,7 +13,7 @@
 /*
 
 /// get variable
-if ( GET_bool(sw::shader_use) )
+if ( GET_bool(ns::shader_use) )
 {
 	// do something
 }
@@ -21,10 +21,10 @@ if ( GET_bool(sw::shader_use) )
 if ( GET_int( great::overview_width ) > 256 ) {}
 
 float fLight1_diffuse = GET_float( light1_diffuse );
-std::string str = GET_string( d3::label2 );
+std::string str = GET_string( ns::label2 );
 
 /// modify all variable in namespace of seismic by UI
-cex::ShowDlg::ShowDlgVarEdit( "abc" );
+cex::ShowDlg::ShowDlgVarEdit( "ns::abc" );
 
 /// set variable, and writing it into configure file
 SET_var( great::overview_width,  150 );
@@ -32,7 +32,7 @@ SET_var( great::overview_width,  150 );
 ///-------------------------------------------------------
 
 /// regist variable in .cpp file
-BEGIN_REGIST_VAR_TABLE_V( d3, 1 )
+BEGIN_REGIST_VAR_TABLE_V( ns, 1 )
 	REGIST_bool(abc, true,			"comment abc")
 	REGIST_int(abc2, 256,			"comment abc2")
 	REGIST_string(abc3,  "abc3",	"comment abc3")

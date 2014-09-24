@@ -1,8 +1,8 @@
 /// \file deltaReflection.h Copyright (C)
 /// \brief 
 ///  providing any type reflection by string key, or even by unsigned int key(string hash code).
-///  providing easy using interface creating like COM that can be using in different modules.
-///  providing singleton pattern implement by interface mapping the implement.
+///  providing easy using interface creating like COM that can be safely using in different modules.
+///  providing singleton pattern implementation, which is an interface that mapping its implement.
 ///
 /// \note:
 /// \author: DI
@@ -13,7 +13,7 @@
 #pragma region example_usage
 /*example usage
 
-// 0 Object create by Interface
+// 0 using an interface LIKE COM
 class IMyInterface : public Interface
 {
 public:
@@ -28,7 +28,7 @@ private:
 	std::string str;
 }
 
-// regist Interface and the implementation
+// register Interface and the implementation in .cpp
 REGIST_DELTA_CREATOR(IMyInterface, IMyImplement)
 
 // how to use
@@ -44,21 +44,16 @@ DeltaDestory(obj);
 {
 void Foo(int k)
 {
-// do something
+	// do something
 }
 
-// regist it in .cpp
+// register it in .cpp
 REGIST_DELTA( "MyLib", "Foo", &Foo);
-}
 
 // using that function
-{
 typedef void (*MethodType)(int);
-
 MethodType func = DeltaCast<MethodType>("MyLib", "Foo");
-
 func(2);
-}
 
 // 2 register a singleton class
 class IInstance : public Interface
@@ -73,10 +68,10 @@ public:
 void foo() {}
 }
 
-// register
+// register it in .cpp
 REGIST_DELTA_INSTANCE(IInstance, InstanceImpl)
 
-// using the Instance safely
+// using the Instance 
 IInstance instance = cex::DeltaInstance<IInstance>();
 
 */
@@ -127,12 +122,12 @@ namespace cex
 			_map[key]=value;
 		}
 
-		void UnRegist(const ValueType& value)
+		void UnRegist(const KeyType& key)
 		{
 			TYPE_MAP::iterator itr = _map.begin();
 			for ( ; itr != _map.end(); ++itr )
 			{
-				if ( itr->second == value )
+				if ( itr->first == key )
 				{
 					_map.erase( itr );
 					return;
@@ -330,7 +325,7 @@ namespace cex
 		catch(std::exception e)
 		{
 			std::cout << "DeltaReflection.h: DeltaCast, invalid lib key: " << libKey << ", value key: "<< valueKey << std::endl;
-			throw(e);
+			throw(std::invalid_argument( "invalid lib key." ));
 		}
 	}
 
@@ -356,7 +351,7 @@ namespace cex
 		catch(std::exception e)
 		{
 			std::cout << "DeltaReflection.h: DeltaCast, invalid lib key: " << libKey << ", value key: "<< valueKey << std::endl;
-			throw(e);
+			throw( std::invalid_argument( "invalid lib key." ) );
 		}
 		
 	}
@@ -382,11 +377,11 @@ namespace cex
 			Traits::Instance().Regist(Traits::Convert(key), value);
 		}
 
-		template<typename DeltaType, typename KeyType>
-		void UnRegister(const KeyType& key, const DeltaType& value)
+		template<typename KeyType>
+		void UnRegister(const KeyType& key)
 		{
 			typedef df::TTypeTraits<KeyType> Traits;
-			Traits::Instance().UnRegist(Traits::Convert(key), value);
+			Traits::Instance().UnRegist(Traits::Convert(key));
 		}
 
 		template<typename DeltaType, typename libKeyType, typename valueKeyType>
@@ -426,8 +421,8 @@ namespace cex
 			reg->Regist(ValueTraits::Convert(valueKey), value);
 		}
 
-		template<typename DeltaType, typename libKeyType, typename valueKeyType>
-		void UnRegister(const libKeyType& libKey, const valueKeyType& valueKey, const DeltaType& value)
+		template<typename libKeyType, typename valueKeyType>
+		void UnRegister(const libKeyType& libKey, const valueKeyType& valueKey)
 		{
 			typedef df::TTypeTraits<libKeyType> LibTraits;
 			typedef df::TTypeTraits<valueKeyType> ValueTraits;
@@ -445,7 +440,7 @@ namespace cex
 
 			assert(reg != NULL);
 
-			reg->UnRegist(ValueTraits::Convert(valueKey), value);
+			reg->UnRegist(ValueTraits::Convert(valueKey));
 		}
 	}
 
