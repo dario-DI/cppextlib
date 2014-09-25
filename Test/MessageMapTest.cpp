@@ -68,7 +68,7 @@ CEX_TEST(MessageMapTest)
 	// 上面的消息发送，被继续推算为下面的形式。
 	// 说明：1 由于MT_TARG_UNWAP必须为每个参数加了一个&，为了和目标函数(any类型)能够匹配，包装消息函数MT_TARG_REF也强制加上了&
 	int nTempVal=100; // 第二个参数首先按值传递，所以有一个临时变量
-	COM_MSG_INSTANCE_PTR->SendComMsg<MessageSender, int&, int&, const ComMsg &>\
+	COM_MSG_INSTANCE.SendComMsg<MessageSender, int&, int&, const ComMsg &>\
 		(MessageMapCom::hash_code(&sender), &sender, nTempVal, nRef, msg);
 	assert(nRef==3);
 

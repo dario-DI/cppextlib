@@ -1,7 +1,7 @@
 /// \file ConfigVar.h Copyright (C).
 /// \brief configurable variable by configure file. 
 ///
-/// insteading of .ini files, it can be using variables of reading and writing
+/// insteading of .ini files, it can be using variables for reading and writing
 ///
 /// \note:
 /// \author: DI
@@ -77,8 +77,8 @@ class CRegistVarProxy { public: CRegistVarProxy(); }; \
 	CRegistVarProxy::CRegistVarProxy() { \
 	cex::ConfigDomainType strVarNameSpace = var_name_space; \
 	cex::ConfigDomainType domainName = config_file_name; \
-	cex::IConfigVarRW* pRW = CONFIGVARRW_REGISTER_INS; \
-	bool bEnableRegistDomainInfo = !pRW->IsConfigureFileExist( domainName );
+	cex::IConfigVarRW& pRW = CONFIGVARRW_REGISTER_INS; \
+	bool bEnableRegistDomainInfo = !pRW.IsConfigureFileExist( domainName );
 
 #define CONFIGVARRW_REGISTER_INS cex::DeltaInstance<cex::IConfigVarRW>()
 #define BOOL_VAR_REGISTER_INS cex::DeltaInstance<cex::ConfigVarBoolean>()
@@ -88,19 +88,19 @@ class CRegistVarProxy { public: CRegistVarProxy(); }; \
 #define VAR_IN_NAME_SPACE( var ) strVarNameSpace+#var
 
 #define	REGIST_bool( var, value, info ) \
-	BOOL_VAR_REGISTER_INS->RegistVar( domainName, VAR_IN_NAME_SPACE(var), value, info );
+	BOOL_VAR_REGISTER_INS.RegistVar( domainName, VAR_IN_NAME_SPACE(var), value, info );
 
 #define	REGIST_int( var, value, info ) \
-	FLOAT_VAR_REGISTER_INS->RegistVar( domainName, VAR_IN_NAME_SPACE(var), (int)value, info );
+	FLOAT_VAR_REGISTER_INS.RegistVar( domainName, VAR_IN_NAME_SPACE(var), (int)value, info );
 
 #define	REGIST_float( var, value, info ) \
-	FLOAT_VAR_REGISTER_INS->RegistVar( domainName, VAR_IN_NAME_SPACE(var), value, info );
+	FLOAT_VAR_REGISTER_INS.RegistVar( domainName, VAR_IN_NAME_SPACE(var), value, info );
 
 #define	REGIST_string( var, value, info ) \
-	STRING_VAR_REGISTER_INS->RegistVar( domainName, VAR_IN_NAME_SPACE(var), value, info );
+	STRING_VAR_REGISTER_INS.RegistVar( domainName, VAR_IN_NAME_SPACE(var), value, info );
 
 #define END_REGIST_VAR_TABLE \
-	if ( bEnableRegistDomainInfo ) { pRW->SaveVar2File(domainName); } } }
+	if ( bEnableRegistDomainInfo ) { pRW.SaveVar2File(domainName); } } }
 
 	//#define VAR_USE_NAMESPACE(name_space) \
 	//	static char* __decl_var_name_space() { return #name_space; }
@@ -120,16 +120,16 @@ class CRegistVarProxy { public: CRegistVarProxy(); }; \
 #define VAR_OUT_NAME_SPACE( var ) #var
 
 #define GET_bool( var ) \
-	BOOL_VAR_REGISTER_INS->GetVar( VAR_OUT_NAME_SPACE(var) )
+	BOOL_VAR_REGISTER_INS.GetVar( VAR_OUT_NAME_SPACE(var) )
 
 #define GET_int( var ) \
-	(int)FLOAT_VAR_REGISTER_INS->GetVar( VAR_OUT_NAME_SPACE(var) )
+	(int)FLOAT_VAR_REGISTER_INS.GetVar( VAR_OUT_NAME_SPACE(var) )
 
 #define GET_float( var ) \
-	FLOAT_VAR_REGISTER_INS->GetVar( VAR_OUT_NAME_SPACE(var) )
+	FLOAT_VAR_REGISTER_INS.GetVar( VAR_OUT_NAME_SPACE(var) )
 
 #define GET_string( var ) \
-	STRING_VAR_REGISTER_INS->GetVar( VAR_OUT_NAME_SPACE(var) )
+	STRING_VAR_REGISTER_INS.GetVar( VAR_OUT_NAME_SPACE(var) )
 
 #define  SET_var( var, value ) \
 	cex::VarRegisterUtil::SetVar( #var, value )

@@ -389,7 +389,7 @@ void LuaState::InitialObject(const std::string& lib)
 
 	luaL_openlibs(_L); //载入所有基本lua库
 
-	cex::DeltaInstance<ILuaCLibRegister>()->OpenLib( _L, lib );
+	cex::DeltaInstance<ILuaCLibRegister>().OpenLib( _L, lib );
 }
 
 LuaState::~LuaState()
@@ -449,7 +449,7 @@ private:
 
 namespace cex
 {
-	ILuaCLibRegister* __stdcall getOrCreateLuaCLibRegister()
+	ILuaCLibRegister& __stdcall getOrCreateLuaCLibRegister()
 	{
 		return DeltaGetOrCreateInstance<ILuaCLibRegister, CLuaCLibRegister>();
 	}

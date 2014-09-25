@@ -86,6 +86,6 @@ namespace cex
 
 	CEX_API IUnitTestMethodRegister& __stdcall getOrCreateUnitTestRegIns()
 	{
-		return *DeltaGetOrCreateInstance<IUnitTestMethodRegister, UTRegister>();
+		return DeltaGetOrCreateInstance<IUnitTestMethodRegister, UTRegister>();
 	}
 }

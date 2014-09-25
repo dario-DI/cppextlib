@@ -94,10 +94,10 @@ namespace exampleCode_recieve_message
 #include <cex/MetaProgram.hpp>
 #include <cex/DeltaReflection.h>
 
-#define COM_MSG_INSTANCE_PTR (MessageMapCom::getOrCreateMessageRegIns())
+#define COM_MSG_INSTANCE (MessageMapCom::getOrCreateMessageRegIns())
 
 #define ADD_COM_MSG_OBSERVER( key, method, reciever_ptr ) \
-	COM_MSG_INSTANCE_PTR->addObserver(key, method, reciever_ptr );
+	COM_MSG_INSTANCE.addObserver(key, method, reciever_ptr );
 
 #define DECL_COM_MESSAGE_MAP(class_name) public: \
 	MessageMapCom::TMessageRegistPxy<class_name> ___comMessageMapProxy; \
@@ -216,7 +216,7 @@ template<typename T> void SendMessageCom( T* ptr, const ComMsg& msg ) { ::SendMe
 	template<typename RetType, typename SenderType MT_COMMA(N) MT_TPARAM(N) >\
 	RetType SendMessageComAnyR( SenderType* ptr MT_COMMA(N) MT_PARAM(N) )\
 	{\
-		return COM_MSG_INSTANCE_PTR->SendComMsgR<RetType,SenderType MT_COMMA(N) MT_TARG_UNWAP(N)>( MessageMapCom::hash_code(ptr), ptr MT_COMMA(N) MT_ARG(N) );\
+		return COM_MSG_INSTANCE.SendComMsgR<RetType,SenderType MT_COMMA(N) MT_TARG_UNWAP(N)>( MessageMapCom::hash_code(ptr), ptr MT_COMMA(N) MT_ARG(N) );\
 	}
 
 /// 消息发送函数实现(含返回值)
@@ -226,7 +226,7 @@ MT_EXPRESSION_IMPL_0_7( MT_SENDMSGCOM_R_IMPL )
 	template<typename SenderType MT_COMMA(N) MT_TPARAM(N) >\
 	void SendMessageComAny( SenderType* ptr MT_COMMA(N) MT_PARAM(N) )\
 	{\
-		return COM_MSG_INSTANCE_PTR->SendComMsg<SenderType MT_COMMA(N) MT_TARG_UNWAP(N)>( MessageMapCom::hash_code(ptr), ptr MT_COMMA(N) MT_ARG(N) );\
+		return COM_MSG_INSTANCE.SendComMsg<SenderType MT_COMMA(N) MT_TARG_UNWAP(N)>( MessageMapCom::hash_code(ptr), ptr MT_COMMA(N) MT_ARG(N) );\
 	}
 
 /// 消息发送函数实现(无返回值)
@@ -470,7 +470,7 @@ namespace MessageMapCom
 
 		~TMessageRegistPxy()
 		{
-			COM_MSG_INSTANCE_PTR->removeObserver( _client );
+			COM_MSG_INSTANCE.removeObserver( _client );
 		}
 
 		client* get() { return _client; }
@@ -480,7 +480,7 @@ namespace MessageMapCom
 		client* _client;
 	};
 
-	CEX_API IMessageRegist* __stdcall getOrCreateMessageRegIns();
+	CEX_API IMessageRegist& __stdcall getOrCreateMessageRegIns();
 
 }
 

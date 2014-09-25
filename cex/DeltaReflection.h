@@ -28,7 +28,7 @@ private:
 	std::string str;
 }
 
-// register Interface and the implementation in .cpp
+// register Interface and the implementation in .cpp file
 REGIST_DELTA_CREATOR(IMyInterface, IMyImplement)
 
 // how to use
@@ -47,7 +47,7 @@ void Foo(int k)
 	// do something
 }
 
-// register it in .cpp
+// register it in .cpp file
 REGIST_DELTA( "MyLib", "Foo", &Foo);
 
 // using that function
@@ -56,23 +56,24 @@ MethodType func = DeltaCast<MethodType>("MyLib", "Foo");
 func(2);
 
 // 2 register a singleton class
-class IInstance : public Interface
+class IMyInstance : public Interface
 {
 public:
 virtual void foo()=0;
 };
 
-class InstanceImpl : public Instance
+class InstanceImpl : public IMynstance
 {
 public:
 void foo() {}
 }
 
-// register it in .cpp
-REGIST_DELTA_INSTANCE(IInstance, InstanceImpl)
+// register it in .cpp file
+REGIST_DELTA_INSTANCE(IMyInstance, InstanceImpl)
 
 // using the Instance 
-IInstance instance = cex::DeltaInstance<IInstance>();
+IMyInstance& instance = cex::DeltaInstance<IInstance>();
+instance.foo();
 
 */
 #pragma endregion
@@ -511,63 +512,16 @@ namespace cex
 	
 
 	// 对象生命周期管理者容器
-	class DeltaRefPtrContainer
+	class CEX_API DeltaRefPtrContainer
 	{
 	public:
-		typedef std::vector<std::shared_ptr<Interface> > DeltaSysRefPtrContainer;
+		typedef std::vector<std::shared_ptr<Interface> > SysRefPtrContainerType;
 
-		static bool IsExisted(Interface* obj)
-		{
-			DeltaSysRefPtrContainer& container = getOrCreateContainer();
-			for (auto v : container)
-			{
-				if (obj == v.get())
-				{
-					return true;
-				}
-			}
+		static bool IsExisted(Interface* obj);
 
-			return false;
-		}
+		static Interface* addObject(std::shared_ptr<Interface> obj);
 
-		static Interface* addObject(std::shared_ptr<Interface> obj)
-		{
-			getOrCreateContainer().push_back(obj);
-			return obj.get();
-		}
-
-		static void removeObject(Interface* obj)
-		{
-			DeltaSysRefPtrContainer& container = getOrCreateContainer();
-
-			container.erase(
-				std::remove_if(container.begin(), container.end(), 
-				[&obj](const std::shared_ptr<Interface>& v)
-			{
-				if (v.get()==obj) return true;
-				else return false;
-			}));
-		}
-
-	private:
-		static DeltaSysRefPtrContainer& getOrCreateContainer()
-		{
-			DeltaSysRefPtrContainer* ptr = nullptr;
-
-			try
-			{
-				ptr = DeltaPTRCast<DeltaSysRefPtrContainer>(DELTA_REGKEY_SYS_REGREFPTR);
-			}
-			catch (std::exception e)
-			{
-				reg::Register(DELTA_REGKEY_SYS_REGREFPTR, DeltaSysRefPtrContainer());
-				ptr = DeltaPTRCast<DeltaSysRefPtrContainer>(DELTA_REGKEY_SYS_REGREFPTR);
-			}
-			
-			assert(ptr!=nullptr);
-
-			return *ptr;
-		}
+		static void removeObject(Interface* obj);
 	};
 
 	//---------------------------------------------------------------------------------------
@@ -652,23 +606,23 @@ namespace cex
 	};
 
 	template<typename IType>
-	IType* DeltaInstance()
+	IType& DeltaInstance()
 	{
-		return DeltaCast<std::shared_ptr<IType> >(DELTA_REGKEY_SYS_INSTANCE, typeid(IType).name()).get(); 
+		return *DeltaCast<std::shared_ptr<IType> >(DELTA_REGKEY_SYS_INSTANCE, typeid(IType).name()).get(); 
 	}
 
 	template<typename IType, typename RType>
-	IType* DeltaGetOrCreateInstance()
+	IType& DeltaGetOrCreateInstance()
 	{
 		try
 		{
-			return cex::DeltaCast<std::shared_ptr<IType> >(DELTA_REGKEY_SYS_INSTANCE, typeid(IType).name()).get();
+			return *cex::DeltaCast<std::shared_ptr<IType> >(DELTA_REGKEY_SYS_INSTANCE, typeid(IType).name()).get();
 		}
 		catch(std::exception e)
 		{
 			std::cout << "Creating Instance: "<<typeid(IType).name()<<std::endl;
 			cex::DeltaObjInstanceRegistProxy<IType, RType> temp;
-			return cex::DeltaCast<std::shared_ptr<IType> >(DELTA_REGKEY_SYS_INSTANCE, typeid(IType).name()).get();
+			return *cex::DeltaCast<std::shared_ptr<IType> >(DELTA_REGKEY_SYS_INSTANCE, typeid(IType).name()).get();
 		}
 	}
 

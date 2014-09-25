@@ -145,7 +145,7 @@ namespace cex
 		virtual void OpenLib( lua_State* L, const std::string& lib )=0;
 	};
 
-	CEX_API ILuaCLibRegister* __stdcall getOrCreateLuaCLibRegister();
+	CEX_API ILuaCLibRegister& __stdcall getOrCreateLuaCLibRegister();
 
 	class CLuaRegistLibProxy
 	{
@@ -154,8 +154,8 @@ namespace cex
 		  _spaceName(spaceName), _reg(reg)
 		  {
 			  assert( reg != NULL );
-			  ILuaCLibRegister* ins = getOrCreateLuaCLibRegister();
-			  ins->AddRegist( spaceName,
+			  ILuaCLibRegister& ins = getOrCreateLuaCLibRegister();
+			  ins.AddRegist( spaceName,
 				  boost::bind( &CLuaRegistLibProxy::RegistFunction, this, _1 ) );
 		  }
 

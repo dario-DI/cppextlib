@@ -39,7 +39,7 @@ namespace cex
 		luaL_checktype(L, -2, LUA_TSTRING );
 		luaL_checktype(L, -3, LUA_TSTRING );
 
-		const IConfigVarRW::LoadValueFuncList& funcList = CONFIGVARRW_REGISTER_INS->GetLoadValueFuncList();
+		const IConfigVarRW::LoadValueFuncList& funcList = CONFIGVARRW_REGISTER_INS.GetLoadValueFuncList();
 
 		for ( size_t i=0; i<funcList.size(); ++i)
 		{
@@ -433,7 +433,7 @@ bool ConfigVarBooleanType::LoadValueFunc(lua_State* L)
 	char* name = (char*)lua_tostring(L, -2);
 	bool number = lua_toboolean(L,-1)>0;
 
-	BOOL_VAR_REGISTER_INS->SetVar( std::string(name_space)+name, number );
+	BOOL_VAR_REGISTER_INS.SetVar( std::string(name_space)+name, number );
 
 	return true;
 }
@@ -459,7 +459,7 @@ bool ConfigVarFloatType::LoadValueFunc(lua_State* L)
 	char* name = (char*)lua_tostring(L, -2);
 	float number = (float)lua_tonumber(L, -1);
 
-	FLOAT_VAR_REGISTER_INS->SetVar( std::string(name_space)+name, number );
+	FLOAT_VAR_REGISTER_INS.SetVar( std::string(name_space)+name, number );
 
 	return true;
 }
@@ -489,7 +489,7 @@ bool ConfigVarStringType::LoadValueFunc(lua_State* L)
 	char* name = (char*)lua_tostring(L, -2);
 	char* number = (char*)lua_tostring(L, -1);
 
-	STRING_VAR_REGISTER_INS->SetVar( std::string(name_space)+name, number );
+	STRING_VAR_REGISTER_INS.SetVar( std::string(name_space)+name, number );
 
 	return true;
 }
@@ -499,7 +499,7 @@ bool ConfigVarStringType::LoadValueFunc(lua_State* L)
 
 static void SetVarValue2RW(const std::string& varName, const std::string& value)
 {
-	bool bRet = CONFIGVARRW_REGISTER_INS->UpdateVarInfo(varName, value);
+	bool bRet = CONFIGVARRW_REGISTER_INS.UpdateVarInfo(varName, value);
 	if ( bRet == false )
 	{
 		assert(false);
@@ -507,46 +507,46 @@ static void SetVarValue2RW(const std::string& varName, const std::string& value)
 	}
 
 	ConfigVarRWByLua::DomainType domain = detail::GetVarNameSpace(varName);
-	domain = CONFIGVARRW_REGISTER_INS->GetDomainNameInVersion(domain);
+	domain = CONFIGVARRW_REGISTER_INS.GetDomainNameInVersion(domain);
 
-	CONFIGVARRW_REGISTER_INS->SaveVar2File(domain);
-	CONFIGVARRW_REGISTER_INS->LoadVarFromFile(domain);
+	CONFIGVARRW_REGISTER_INS.SaveVar2File(domain);
+	CONFIGVARRW_REGISTER_INS.LoadVarFromFile(domain);
 
 }
 
 void VarRegisterUtil::SetVar( const std::string& varName, bool v )
 {
-	BOOL_VAR_REGISTER_INS->SetVarPure(varName, v);
+	BOOL_VAR_REGISTER_INS.SetVarPure(varName, v);
 	SetVarValue2RW(varName, cex::ConfigVarBooleanType::Value2String(v));
 }
 
 void VarRegisterUtil::SetVar( const std::string& varName, float v )
 {
-	FLOAT_VAR_REGISTER_INS->SetVarPure(varName, v);
+	FLOAT_VAR_REGISTER_INS.SetVarPure(varName, v);
 	SetVarValue2RW(varName, cex::ConfigVarFloatType::Value2String(v));
 }
 
 void VarRegisterUtil::SetVar( const std::string& varName, int v )
 {
-	FLOAT_VAR_REGISTER_INS->SetVarPure(varName, (float)v);
+	FLOAT_VAR_REGISTER_INS.SetVarPure(varName, (float)v);
 	SetVarValue2RW(varName, cex::ConfigVarFloatType::Value2String((float)v));
 }
 
 void VarRegisterUtil::SetVar( const std::string& varName, double v )
 {
-	FLOAT_VAR_REGISTER_INS->SetVarPure(varName, (float)v);
+	FLOAT_VAR_REGISTER_INS.SetVarPure(varName, (float)v);
 	SetVarValue2RW(varName, cex::ConfigVarFloatType::Value2String((float)v));
 }
 
 void VarRegisterUtil::SetVar( const std::string& varName, const char* v )
 {
-	STRING_VAR_REGISTER_INS->SetVarPure(varName, std::string(v));
+	STRING_VAR_REGISTER_INS.SetVarPure(varName, std::string(v));
 	SetVarValue2RW(varName, cex::ConfigVarStringType::Value2String(v));
 }
 
 void VarRegisterUtil::SetVar( const std::string& varName, const std::string& v )
 {
-	STRING_VAR_REGISTER_INS->SetVarPure(varName, v);
+	STRING_VAR_REGISTER_INS.SetVarPure(varName, v);
 	SetVarValue2RW(varName, cex::ConfigVarStringType::Value2String(v));
 }
 
@@ -560,7 +560,7 @@ class ConfigVar : public IConfigVar<DataType>
 public:
 	ConfigVar()
 	{
-		_rw = CONFIGVARRW_REGISTER_INS;
+		_rw = &CONFIGVARRW_REGISTER_INS;
 		_rw->RegisterLoadValueFunc(boost::bind( &DataType::LoadValueFunc, _1 ));
 	}
 

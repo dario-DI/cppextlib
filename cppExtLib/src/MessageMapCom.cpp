@@ -2,7 +2,7 @@
 
 void __stdcall ShutMessageMapCom()
 {
-	COM_MSG_INSTANCE_PTR->ClearMessageMap();
+	COM_MSG_INSTANCE.ClearMessageMap();
 }
 
 namespace MessageMapCom
@@ -194,7 +194,7 @@ namespace MessageMapCom
 		}
 	};
 
-	CEX_API IMessageRegist* __stdcall getOrCreateMessageRegIns()
+	CEX_API IMessageRegist& __stdcall getOrCreateMessageRegIns()
 	{
 		return cex::DeltaGetOrCreateInstance<IMessageRegist, MessageRegist>();
 	}

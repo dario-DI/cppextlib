@@ -169,9 +169,8 @@ CEX_TEST(DeltaReflectTest)
 
 
 		// test instance
-		Test2* test2 = DeltaInstance<Test2>();
-		assert(test2!=nullptr);
-		test2->v = 2;
+		Test2& test2 = DeltaInstance<Test2>();
+		test2.v = 2;
 	}
 	
 }
